@@ -1,0 +1,241 @@
+@import '@fontsource-variable/archivo/standard.css';
+
+:root {
+  --cal: #f3efe7;
+  --piedra: #e3dccf;
+  --grafito: #1b1c1f;
+  --cemento: #625e57;
+  --azul: #0d3b73;
+  --azul-hondo: #0a2b55;
+  --rojo: #c4261e;
+  --linea: #cfc7b8;
+
+  --font: 'Archivo Variable', 'Archivo', system-ui, sans-serif;
+  --gutter: clamp(20px, 5vw, 64px);
+  --wrap: 1320px;
+  --header-h: 72px;
+  --ease-out: cubic-bezier(0.2, 0.7, 0.1, 1);
+
+  --step--1: clamp(0.875rem, 0.85rem + 0.1vw, 0.9375rem);
+  --step-0: clamp(1.0625rem, 1rem + 0.2vw, 1.125rem);
+  --step-1: clamp(1.25rem, 1.1rem + 0.6vw, 1.5rem);
+  --step-2: clamp(1.6rem, 1.3rem + 1.3vw, 2.25rem);
+  --step-3: clamp(2.1rem, 1.5rem + 2.6vw, 3.6rem);
+  --step-4: clamp(2.6rem, 1.6rem + 4.4vw, 5.4rem);
+
+  color-scheme: light;
+}
+
+*,
+*::before,
+*::after {
+  box-sizing: border-box;
+}
+
+html {
+  -webkit-text-size-adjust: 100%;
+  scroll-padding-top: calc(var(--header-h) + 16px);
+}
+
+@media (prefers-reduced-motion: no-preference) {
+  html {
+    scroll-behavior: smooth;
+  }
+}
+
+body {
+  margin: 0;
+  background: var(--cal);
+  color: var(--grafito);
+  font-family: var(--font);
+  font-size: var(--step-0);
+  line-height: 1.55;
+  overflow-x: clip;
+  text-rendering: optimizeLegibility;
+  -webkit-font-smoothing: antialiased;
+}
+
+img {
+  display: block;
+  max-width: 100%;
+  height: auto;
+}
+
+h1,
+h2,
+h3 {
+  margin: 0;
+  font-stretch: 112%;
+  font-weight: 760;
+  line-height: 1.02;
+  letter-spacing: -0.025em;
+  text-wrap: balance;
+}
+
+p {
+  margin: 0;
+  text-wrap: pretty;
+}
+
+a {
+  color: inherit;
+}
+
+:focus-visible {
+  outline: 3px solid var(--azul);
+  outline-offset: 3px;
+}
+
+.wrap {
+  width: 100%;
+  max-width: calc(var(--wrap) + var(--gutter) * 2);
+  margin-inline: auto;
+  padding-inline: var(--gutter);
+}
+
+.visually-hidden {
+  position: absolute !important;
+  width: 1px;
+  height: 1px;
+  overflow: hidden;
+  clip: rect(0 0 0 0);
+  white-space: nowrap;
+}
+
+.skip-link {
+  position: fixed;
+  top: 12px;
+  left: 12px;
+  z-index: 100;
+  padding: 12px 16px;
+  background: var(--grafito);
+  color: var(--cal);
+  font-weight: 600;
+  text-decoration: none;
+  transform: translateY(-160%);
+}
+
+.skip-link:focus-visible {
+  transform: none;
+}
+
+/* Cabecera de sección: número estrecho + titular ancho */
+.kicker {
+  display: flex;
+  align-items: baseline;
+  gap: 14px;
+  margin-bottom: clamp(20px, 3vw, 32px);
+  color: var(--cemento);
+  font-size: var(--step--1);
+  font-weight: 560;
+}
+
+.kicker::before {
+  content: '';
+  width: 28px;
+  height: 2px;
+  background: var(--rojo);
+  transform: translateY(-4px);
+}
+
+.lead {
+  font-size: var(--step-1);
+  line-height: 1.45;
+  max-width: 38ch;
+}
+
+/* Botones: uno sólido, uno de línea */
+.btn {
+  display: inline-flex;
+  align-items: center;
+  justify-content: center;
+  gap: 10px;
+  min-height: 52px;
+  padding: 12px 24px;
+  border: 1.5px solid var(--grafito);
+  border-radius: 2px;
+  background: var(--grafito);
+  color: var(--cal);
+  font: inherit;
+  font-size: 1rem;
+  font-weight: 620;
+  text-decoration: none;
+  transition:
+    background-color 200ms ease,
+    color 200ms ease,
+    border-color 200ms ease,
+    transform 120ms ease;
+}
+
+.btn svg {
+  width: 18px;
+  height: 18px;
+  flex: none;
+}
+
+.btn:hover {
+  background: var(--azul);
+  border-color: var(--azul);
+}
+
+.btn:active {
+  transform: translateY(1px);
+}
+
+.btn--line {
+  background: transparent;
+  color: var(--grafito);
+}
+
+.btn--line:hover {
+  background: var(--grafito);
+  border-color: var(--grafito);
+  color: var(--cal);
+}
+
+/* Enlace con subrayado que se dibuja */
+.link {
+  text-decoration: none;
+  background: linear-gradient(currentColor, currentColor) 0 100% / 100% 1px no-repeat;
+  transition: background-size 260ms var(--ease-out);
+}
+
+.link:hover {
+  background-size: 0% 1px;
+  background-position: 100% 100%;
+}
+
+/* Marco de foto con zoom contenido */
+.frame {
+  overflow: hidden;
+  background: var(--piedra);
+}
+
+.frame img {
+  width: 100%;
+  height: 100%;
+  object-fit: cover;
+  transition: transform 700ms var(--ease-out);
+}
+
+@media (hover: hover) {
+  a:hover > .frame img,
+  .frame:hover img {
+    transform: scale(1.03);
+  }
+}
+
+.note {
+  color: var(--cemento);
+  font-size: var(--step--1);
+}
+
+@media (prefers-reduced-motion: reduce) {
+  *,
+  *::before,
+  *::after {
+    animation-duration: 0.01ms !important;
+    animation-iteration-count: 1 !important;
+    transition-duration: 0.01ms !important;
+  }
+}

@@ -1,0 +1,178 @@
+---
+import { Picture } from 'astro:assets';
+import instalaciones from '../assets/img/instalaciones.jpg';
+
+const pasos = [
+  { t: 'Cuéntanos qué vas a hacer', d: 'Una obra nueva, un baño o un arreglo: empieza por explicarnos el trabajo.' },
+  { t: 'Te aconsejamos', d: 'Te orientamos sobre qué material usar y cuánto necesitas.' },
+  { t: 'Eliges el material', d: 'En el almacén y en la exposición, viéndolo en persona.' },
+  { t: 'Te acompañamos en la obra', d: 'Si surge una duda a mitad de trabajo, seguimos al teléfono.' },
+];
+
+const extras = [
+  { t: 'Asesoramiento', d: 'En el mostrador, para profesionales y particulares.' },
+  { t: 'Exposición', d: 'Cerámica y baño para ver en persona.' },
+  { t: 'Transporte', d: 'Pregunta por teléfono condiciones y zonas de reparto.' },
+];
+---
+
+<section class="proceso" id="como-trabajamos" aria-labelledby="proceso-title">
+  <div class="wrap">
+    <p class="kicker">Cómo trabajamos</p>
+    <h2 id="proceso-title">De la idea al material, con alguien que conoce la obra</h2>
+
+    <ol class="pasos">
+      {
+        pasos.map((p, i) => (
+          <li class="paso">
+            <span class="num" aria-hidden="true">{String(i + 1).padStart(2, '0')}</span>
+            <h3>{p.t}</h3>
+            <p>{p.d}</p>
+          </li>
+        ))
+      }
+    </ol>
+
+    <div class="mas">
+      <div class="foto frame">
+        <Picture
+          src={instalaciones}
+          formats={['avif', 'webp']}
+          widths={[480, 720, 960]}
+          sizes="(max-width: 900px) 100vw, 48vw"
+          alt="Tuberías de fontanería y tubos eléctricos en una pared en obra"
+          loading="lazy"
+        />
+      </div>
+
+      <div class="extras">
+        <h3 class="ademas">Además</h3>
+        <dl>
+          {
+            extras.map((e) => (
+              <div class="fila">
+                <dt>{e.t}</dt>
+                <dd>{e.d}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .proceso {
+    padding-block: clamp(80px, 12vh, 140px);
+    background: var(--piedra);
+  }
+
+  h2 {
+    max-width: 22ch;
+    font-size: var(--step-3);
+    margin-bottom: clamp(36px, 6vh, 64px);
+  }
+
+  .pasos {
+    display: grid;
+    grid-template-columns: repeat(4, minmax(0, 1fr));
+    gap: 24px;
+    margin: 0 0 clamp(56px, 9vh, 96px);
+    padding: 0;
+    list-style: none;
+  }
+
+  .paso {
+    padding-top: 18px;
+    border-top: 1px solid var(--grafito);
+  }
+
+  .num {
+    display: block;
+    margin-bottom: 14px;
+    color: var(--rojo);
+    font-size: var(--step-3);
+    font-weight: 600;
+    font-stretch: 70%;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .paso h3 {
+    margin-bottom: 8px;
+    font-size: var(--step-1);
+    line-height: 1.1;
+  }
+
+  .paso p {
+    color: var(--cemento);
+    font-size: var(--step--1);
+  }
+
+  .mas {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
+    align-items: end;
+  }
+
+  .foto {
+    grid-column: 1 / span 6;
+    aspect-ratio: 3 / 2;
+  }
+
+  .extras {
+    grid-column: 7 / -1;
+  }
+
+  .ademas {
+    margin-bottom: 20px;
+    font-size: var(--step-2);
+  }
+
+  dl {
+    margin: 0;
+    border-top: 1px solid var(--grafito);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr) minmax(0, 2fr);
+    gap: 8px 24px;
+    padding-block: 16px;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  dt {
+    font-weight: 700;
+  }
+
+  dd {
+    margin: 0;
+    color: var(--cemento);
+  }
+
+  @media (max-width: 1000px) {
+    .pasos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+    }
+  }
+
+  @media (max-width: 900px) {
+    .foto,
+    .extras {
+      grid-column: 1 / -1;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .pasos {
+      grid-template-columns: 1fr;
+    }
+
+    .fila {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>

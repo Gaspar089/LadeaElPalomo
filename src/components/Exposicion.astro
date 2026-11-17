@@ -1,0 +1,427 @@
+---
+import { Picture } from 'astro:assets';
+import obra from '../assets/img/obra.jpg';
+import estructura from '../assets/img/estructura.jpg';
+import alicatado from '../assets/img/alicatado.jpg';
+import espacio from '../assets/img/espacio.jpg';
+
+const pasos = [
+  {
+    numero: '01',
+    titulo: 'Obra',
+    texto: 'Paredes desnudas e instalaciones por hacer. Aquí empieza todo.',
+    imagen: obra,
+    alt: 'Estancia en obra con paredes de hormigón y un tragaluz',
+  },
+  {
+    numero: '02',
+    titulo: 'Estructura',
+    texto: 'Bloque, ladrillo, cemento y áridos: el material básico del almacén.',
+    imagen: estructura,
+    alt: 'Manos colocando bloques de hormigón con mortero y paleta',
+  },
+  {
+    numero: '03',
+    titulo: 'Revestimiento',
+    texto: 'Cerámica para suelo y pared, con su adhesivo y sus crucetas.',
+    imagen: alicatado,
+    alt: 'Mano colocando un azulejo blanco sobre adhesivo con crucetas',
+  },
+  {
+    numero: '04',
+    titulo: 'Espacio',
+    texto: 'El baño terminado: sanitarios, grifería y accesorios.',
+    imagen: espacio,
+    alt: 'Baño terminado con lavabo de piedra y grifería negra',
+  },
+];
+---
+
+<section class="exposicion" id="exposicion" aria-labelledby="exposicion-title">
+  <div class="wrap">
+    <header class="intro">
+      <p class="kicker">Exposición</p>
+      <h2 id="exposicion-title">De la obra al espacio</h2>
+      <p class="lead">
+        El Palomo tiene exposición en el almacén. Pásate a ver el material en persona antes de decidir: el color, el
+        tacto y el tamaño de la pieza se entienden mejor que en una foto.
+      </p>
+      <a class="btn btn--line" href="#visita">Ver horario y dirección</a>
+    </header>
+
+    <div class="scene" aria-label="Cuatro pasos de la obra al espacio">
+      <div class="regla" aria-hidden="true">
+        <div class="marcas">
+          {Array.from({ length: 33 }, (_, i) => <span class:list={['marca', { larga: i % 8 === 0 }]}></span>)}
+        </div>
+        <div class="progreso"></div>
+        <div class="numeros">
+          {pasos.map((paso, i) => <span class="numero-regla" style={`--i:${i}`}>{paso.numero}</span>)}
+        </div>
+      </div>
+      <ol class="pasos">
+        {pasos.map((paso, i) => (
+          <li class="paso" aria-current={i === 0 ? 'step' : undefined}>
+            <span class="numero">{paso.numero}</span>
+            <h3>{paso.titulo}</h3>
+            <p>{paso.texto}</p>
+            <div class="foto frame">
+              <Picture
+                src={paso.imagen}
+                formats={['avif', 'webp']}
+                widths={[640, 960, 1400]}
+                sizes="(max-width: 900px) 100vw, 60vw"
+                alt={paso.alt}
+                loading="lazy"
+              />
+            </div>
+          </li>
+        ))}
+      </ol>
+    </div>
+
+    <p class="note">Fotografías ilustrativas: no muestran la exposición ni trabajos de El Palomo.</p>
+  </div>
+</section>
+
+<script>
+  import { withMotion, gsap } from '../lib/motion';
+
+  withMotion({ desktop: '(min-width: 901px)' }, () => {
+    const section = document.querySelector<HTMLElement>('#exposicion');
+    const scene = section?.querySelector<HTMLElement>('.scene');
+    const cards = section?.querySelectorAll<HTMLElement>('.paso');
+    const progreso = section?.querySelector<HTMLElement>('.progreso');
+    if (!section || !scene || !cards?.length || !progreso) return;
+
+    section.classList.add('is-scene');
+    const tl = gsap.timeline({
+      scrollTrigger: {
+        trigger: scene,
+        pin: true,
+        // la cabecera fija mide 72px: la escena se fija justo debajo
+        start: 'top top+=72',
+        end: `+=${(cards.length * 85)}%`,
+        scrub: 0.6,
+        anticipatePin: 1,
+        onUpdate: (self) => {
+          const active = Math.min(cards.length - 1, Math.floor(self.progress * cards.length));
+          cards.forEach((card, index) => {
+            if (index === active) card.setAttribute('aria-current', 'step');
+            else card.removeAttribute('aria-current');
+          });
+        },
+      },
+    });
+
+    cards.forEach((card, index) => {
+      const foto = card.querySelector<HTMLElement>('.foto');
+      const numero = card.querySelector<HTMLElement>('.numero');
+      const titulo = card.querySelector<HTMLElement>('h3');
+      const texto = card.querySelector<HTMLElement>('p');
+      if (index === 0) {
+        gsap.set(card, { autoAlpha: 1 });
+        gsap.set(foto, { clipPath: 'inset(0% 0 0 0)', scale: 1 });
+        gsap.set([numero, titulo, texto], { autoAlpha: 1, y: 0 });
+      } else {
+        gsap.set(card, { autoAlpha: 1 });
+        gsap.set(foto, { clipPath: 'inset(100% 0 0 0)', scale: 1.15 });
+        gsap.set([numero, titulo, texto], { autoAlpha: 0, y: 24 });
+      }
+      if (index > 0) {
+        // cada paso ocupa una unidad de tiempo; con '<' todos caerían en el mismo instante
+        const at = index - 1 + 0.1;
+        const previous = cards[index - 1];
+        tl.addLabel(`paso-${index + 1}`, at)
+          .to(previous.querySelector('.foto'), { scale: 0.92, filter: 'brightness(0.55)', duration: 0.8 }, at)
+          .to(previous.querySelectorAll('.numero, h3, p'), { autoAlpha: 0, y: -24, duration: 0.35 }, at)
+          .to(foto, { clipPath: 'inset(0% 0 0 0)', scale: 1, duration: 0.8 }, at)
+          .to([numero, titulo, texto], { autoAlpha: 1, y: 0, duration: 0.45 }, at + 0.3);
+      }
+    });
+    tl.to(progreso, { scaleY: 1, ease: 'none', duration: cards.length - 1 }, 0);
+
+    // matchMedia revierte los tweens; la clase hay que quitarla a mano
+    return () => section.classList.remove('is-scene');
+  });
+</script>
+
+<style>
+  .exposicion {
+    padding-block: clamp(72px, 10vh, 112px) 48px;
+    background: var(--grafito);
+    color: var(--cal);
+    /* las fotos en escala 1.15 no deben crear scroll lateral */
+    overflow-x: clip;
+  }
+
+  .intro {
+    max-width: 900px;
+    margin-bottom: clamp(36px, 6vh, 64px);
+  }
+
+  .kicker {
+    color: rgb(243 239 231 / 75%);
+  }
+
+  h2 {
+    max-width: 18ch;
+    margin-bottom: 24px;
+    font-size: var(--step-4);
+  }
+
+  .lead {
+    max-width: 52ch;
+    margin-bottom: 28px;
+  }
+
+  .btn--line {
+    border-color: var(--cal);
+    color: var(--cal);
+  }
+
+  .btn--line:hover {
+    border-color: var(--cal);
+    background: var(--cal);
+    color: var(--grafito);
+  }
+
+  .scene {
+    position: relative;
+  }
+
+  .pasos {
+    display: grid;
+    grid-template-columns: minmax(0, 1fr);
+    gap: 20px;
+    margin: 0;
+    padding: 0 0 48px;
+    list-style: none;
+  }
+
+  .paso {
+    position: sticky;
+    top: calc(var(--header-h) + 16px + var(--i, 0) * 12px);
+    display: grid;
+    grid-template-columns: auto 1fr;
+    grid-template-rows: auto auto auto;
+    gap: 4px 16px;
+    padding: 20px;
+    border-top: 1px solid rgb(243 239 231 / 20%);
+    background: var(--grafito);
+  }
+
+  .paso:nth-child(1) { --i: 0; }
+  .paso:nth-child(2) { --i: 1; }
+  .paso:nth-child(3) { --i: 2; }
+  .paso:nth-child(4) { --i: 3; }
+
+  .numero {
+    grid-row: 1 / span 2;
+    align-self: center;
+    color: #e0473f;
+    font-size: clamp(2.8rem, 6vw, 5rem);
+    font-stretch: 70%;
+    font-weight: 760;
+    line-height: 0.9;
+  }
+
+  h3 {
+    align-self: end;
+    font-size: var(--step-2);
+  }
+
+  .paso > p {
+    grid-column: 2;
+    max-width: 34ch;
+    color: rgb(243 239 231 / 85%);
+  }
+
+  .foto {
+    grid-column: 1 / -1;
+    grid-row: 3;
+    aspect-ratio: 4 / 5;
+    margin-top: 16px;
+    background: #292a2e;
+  }
+
+  .foto :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  .note {
+    padding-top: 8px;
+    color: rgb(243 239 231 / 60%);
+  }
+
+  .regla {
+    display: none;
+  }
+
+  @media (min-width: 601px) and (max-width: 900px) {
+    .pasos {
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      gap: 12px;
+      padding-bottom: 36px;
+    }
+
+    .paso {
+      position: relative;
+      top: auto;
+    }
+  }
+
+  /* Escritorio sin JS o con movimiento reducido: las cuatro fichas en fila */
+  @media (min-width: 901px) {
+    .exposicion:not(.is-scene) .pasos {
+      grid-template-columns: repeat(4, minmax(0, 1fr));
+      gap: 24px;
+    }
+
+    .exposicion:not(.is-scene) .paso {
+      position: relative;
+      top: auto;
+      padding: 20px 0 0;
+      background: none;
+    }
+
+    .exposicion:not(.is-scene) .numero {
+      font-size: var(--step-3);
+    }
+  }
+
+  @media (min-width: 901px) {
+    .exposicion.is-scene {
+      padding-top: 72px;
+      padding-bottom: 48px;
+    }
+
+    .is-scene .intro {
+      max-width: 980px;
+      margin-bottom: 32px;
+    }
+
+    .is-scene .intro .lead {
+      max-width: 60ch;
+    }
+
+    .is-scene .scene {
+      height: calc(100svh - 72px);
+      min-height: 620px;
+    }
+
+    .is-scene .pasos {
+      position: relative;
+      width: 100%;
+      height: 100%;
+      padding: 0 0 0 8.333%;
+    }
+
+    .is-scene .paso {
+      position: absolute;
+      inset: 0;
+      display: block;
+      padding: 0 0 0 8.333%;
+      border: 0;
+      background: transparent;
+      opacity: 0;
+    }
+
+    .is-scene .paso:first-child {
+      opacity: 1;
+    }
+
+    .is-scene .numero,
+    .is-scene h3,
+    .is-scene .paso > p {
+      position: absolute;
+      /* deja libre la regla (52px) a la izquierda */
+      left: 72px;
+      width: calc(33.333% - 104px);
+    }
+
+    .is-scene .numero {
+      top: 18%;
+      font-size: clamp(4rem, 8vw, 7rem);
+    }
+
+    .is-scene h3 {
+      top: 37%;
+    }
+
+    .is-scene .paso > p {
+      top: calc(37% + 3.5rem);
+      margin: 0;
+      padding-right: 24px;
+    }
+
+    .is-scene .foto {
+      position: absolute;
+      top: 11%;
+      right: 0;
+      width: 66.667%;
+      height: 78%;
+      margin: 0;
+      aspect-ratio: auto;
+      transform-origin: center;
+      will-change: transform, clip-path, filter;
+    }
+
+    .is-scene .regla {
+      position: absolute;
+      z-index: 3;
+      top: 18%;
+      bottom: 18%;
+      left: 0;
+      display: block;
+      width: 52px;
+    }
+
+    .marcas {
+      position: absolute;
+      inset: 0 auto 0 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      width: 24px;
+    }
+
+    .marca {
+      width: 7px;
+      height: 1px;
+      background: rgb(243 239 231 / 32%);
+    }
+
+    .marca.larga {
+      width: 15px;
+      background: rgb(243 239 231 / 65%);
+    }
+
+    .progreso {
+      position: absolute;
+      top: 0;
+      left: 0;
+      width: 2px;
+      height: 100%;
+      background: #e0473f;
+      transform: scaleY(0);
+      transform-origin: top;
+    }
+
+    .numeros {
+      position: absolute;
+      inset: 0 0 0 22px;
+      display: flex;
+      flex-direction: column;
+      justify-content: space-between;
+      color: rgb(243 239 231 / 70%);
+      font-size: 11px;
+    }
+
+    .note {
+      padding-top: 18px;
+    }
+  }
+</style>

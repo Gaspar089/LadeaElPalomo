@@ -1,0 +1,495 @@
+---
+import { Picture } from 'astro:assets';
+import ladrillo from '../assets/img/ladrillo.jpg';
+import pavimento from '../assets/img/pavimento.jpg';
+import bloques from '../assets/img/bloques.jpg';
+import hidraulico from '../assets/img/hidraulico.jpg';
+import bano from '../assets/img/bano.jpg';
+import herramientas from '../assets/img/herramientas.jpg';
+import { negocio } from '../data/negocio';
+
+// Muestras visibles desde el primer segundo: las cuatro familias verificadas
+const muestras = [
+  { n: '01', nombre: 'Material básico', img: bloques },
+  { n: '02', nombre: 'Pavimentos y revestimientos', img: hidraulico },
+  { n: '03', nombre: 'Baño', img: bano },
+  { n: '04', nombre: 'Ferretería', img: herramientas },
+];
+---
+
+<section class="hero" id="top" aria-labelledby="hero-title" data-hero>
+  <div class="stage" data-stage>
+    <!-- Ventana: de la obra (ladrillo) al espacio (baño terminado) -->
+    <div class="window" data-window aria-hidden="true">
+      <div class="layer layer--material" data-material>
+        <Picture
+          src={ladrillo}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1280]}
+          sizes="100vw"
+          quality={45}
+          alt=""
+          loading="eager"
+          fetchpriority="high"
+        />
+      </div>
+      <div class="layer layer--espacio" data-espacio>
+        <Picture
+          src={pavimento}
+          formats={['avif', 'webp']}
+          widths={[640, 960, 1400, 2000]}
+          sizes="100vw"
+          alt=""
+          loading="lazy"
+        />
+      </div>
+      <p class="window-panel" data-panel>
+        Material básico, cerámica, baño y ferretería en un mismo almacén de Membrilla
+      </p>
+    </div>
+
+    <p class="word word--a" aria-hidden="true"><span data-word="a">Del material</span></p>
+    <p class="word word--b" aria-hidden="true"><span data-word="b">al espacio</span></p>
+
+    <div class="info" data-side="left">
+      <p class="place">{negocio.localidad} · {negocio.provincia}</p>
+      <h1 id="hero-title">Material de obra, cerámica y baño en Membrilla</h1>
+      <p class="lead">
+        Almacén familiar con exposición en la calle Don Quijote, para profesionales y para quien reforma su casa.
+      </p>
+      <div class="actions">
+        <a class="btn" href={negocio.telefonoHref}>
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"
+            ><path
+              d="M22 16.9v3a2 2 0 0 1-2.2 2 19.8 19.8 0 0 1-8.6-3.1 19.5 19.5 0 0 1-6-6A19.8 19.8 0 0 1 2.1 4.2 2 2 0 0 1 4.1 2h3a2 2 0 0 1 2 1.7c.1.9.4 1.8.7 2.7a2 2 0 0 1-.5 2.1L8 9.8a16 16 0 0 0 6 6l1.3-1.3a2 2 0 0 1 2.1-.4c.9.3 1.8.6 2.7.7a2 2 0 0 1 1.7 2z"
+            ></path></svg
+          >
+          {negocio.telefono}
+        </a>
+        <a class="btn btn--line" href="#visita">Cómo llegar</a>
+      </div>
+    </div>
+
+    <nav class="muestras" aria-label="Familias de producto" data-side="right">
+      <p class="muestras-title">En el almacén</p>
+      <ul>
+        {
+          muestras.map((m) => (
+            <li>
+              <a href="#materiales">
+                <span class="chip">
+                  <Picture src={m.img} formats={['avif', 'webp']} widths={[96, 160]} sizes="56px" alt="" loading="eager" />
+                </span>
+                <span class="chip-n">{m.n}</span>
+                <span class="chip-name">{m.nombre}</span>
+              </a>
+            </li>
+          ))
+        }
+      </ul>
+    </nav>
+
+    <div class="ruler" aria-hidden="true"><span class="ruler-fill" data-ruler></span></div>
+  </div>
+</section>
+
+<style>
+  .hero {
+    position: relative;
+    background: var(--cal);
+  }
+
+  .stage {
+    --win-top: 25%;
+    --win-right: 30%;
+    --win-bottom: 25%;
+    --win-left: 36%;
+    position: relative;
+    height: calc(100svh - var(--header-h));
+    min-height: 620px;
+    max-height: 1000px;
+    overflow: hidden;
+    isolation: isolate;
+  }
+
+  /* --- ventana --- */
+  .window {
+    position: absolute;
+    inset: 0;
+    z-index: 1;
+    clip-path: inset(var(--win-top) var(--win-right) var(--win-bottom) var(--win-left));
+    background: var(--piedra);
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+  }
+
+  .layer :global(picture),
+  .layer :global(img) {
+    display: block;
+    width: 100%;
+    height: 100%;
+  }
+
+  .layer :global(img) {
+    object-fit: cover;
+  }
+
+  .layer--material :global(img) {
+    object-position: 50% 55%;
+  }
+
+  .layer--espacio {
+    clip-path: inset(100% 0 0 0);
+  }
+
+  .layer--espacio :global(img) {
+    object-position: 50% 60%;
+  }
+
+  .window-panel {
+    position: absolute;
+    left: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    bottom: 48px;
+    max-width: 30ch;
+    padding: 20px 24px;
+    background: var(--cal);
+    color: var(--grafito);
+    font-size: var(--step-1);
+    font-weight: 620;
+    line-height: 1.3;
+    opacity: 0;
+    visibility: hidden;
+  }
+
+  /* --- palabras --- */
+  .word {
+    position: absolute;
+    z-index: 2;
+    margin: 0;
+    overflow: hidden;
+    color: var(--grafito);
+    font-size: clamp(3.4rem, 1rem + 9.4vw, 10.5rem);
+    font-weight: 820;
+    font-stretch: 118%;
+    letter-spacing: -0.045em;
+    line-height: 0.92;
+    white-space: nowrap;
+    pointer-events: none;
+  }
+
+  .word span {
+    display: block;
+    padding-bottom: 0.06em;
+  }
+
+  .word--a {
+    top: 3%;
+    left: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+  }
+
+  .word--b {
+    right: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    bottom: 5%;
+  }
+
+  /* --- columna izquierda --- */
+  .info {
+    position: absolute;
+    z-index: 2;
+    left: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    top: var(--win-top);
+    width: calc(var(--win-left) - max(var(--gutter), calc((100vw - var(--wrap)) / 2)) - 40px);
+    max-width: 440px;
+  }
+
+  .place {
+    margin-bottom: 16px;
+    color: var(--rojo);
+    font-size: var(--step--1);
+    font-weight: 640;
+    font-stretch: 90%;
+  }
+
+  h1 {
+    font-size: var(--step-2);
+    font-weight: 740;
+    font-stretch: 108%;
+    line-height: 1.05;
+  }
+
+  .lead {
+    margin-top: 16px;
+    font-size: var(--step-0);
+    color: var(--cemento);
+  }
+
+  .actions {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 8px;
+    margin-top: 24px;
+  }
+
+  /* --- muestras a la derecha --- */
+  .muestras {
+    position: absolute;
+    z-index: 2;
+    top: var(--win-top);
+    right: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    width: calc(var(--win-right) - max(var(--gutter), calc((100vw - var(--wrap)) / 2)) - 40px);
+    max-width: 300px;
+  }
+
+  .muestras-title {
+    margin-bottom: 12px;
+    color: var(--cemento);
+    font-size: var(--step--1);
+  }
+
+  .muestras ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--grafito);
+  }
+
+  .muestras a {
+    display: grid;
+    grid-template-columns: 48px 28px 1fr;
+    align-items: center;
+    gap: 12px;
+    min-height: 64px;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--linea);
+    text-decoration: none;
+    font-size: 0.95rem;
+    font-weight: 600;
+    line-height: 1.2;
+  }
+
+  .chip {
+    width: 48px;
+    height: 48px;
+    overflow: hidden;
+    background: var(--piedra);
+  }
+
+  .chip :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+    transition: transform 500ms var(--ease-out);
+  }
+
+  .chip-n {
+    color: var(--rojo);
+    font-size: 0.85rem;
+    font-stretch: 70%;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .chip-name {
+    transition: transform 300ms var(--ease-out);
+  }
+
+  @media (hover: hover) {
+    .muestras a:hover .chip :global(img) {
+      transform: scale(1.15);
+    }
+
+    .muestras a:hover .chip-name {
+      transform: translateX(4px);
+    }
+  }
+
+  /* --- regla --- */
+  .ruler {
+    position: absolute;
+    z-index: 3;
+    left: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    right: max(var(--gutter), calc((100vw - var(--wrap)) / 2));
+    bottom: 0;
+    height: 12px;
+    background:
+      repeating-linear-gradient(90deg, var(--grafito) 0 1px, transparent 1px 40px) 0 100% / 100% 12px no-repeat,
+      repeating-linear-gradient(90deg, var(--cemento) 0 1px, transparent 1px 8px) 0 100% / 100% 6px no-repeat;
+    opacity: 0.6;
+  }
+
+  .ruler-fill {
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 0;
+    height: 3px;
+    background: var(--rojo);
+    transform: scaleX(0);
+    transform-origin: left;
+  }
+
+  /* --- tablet y móvil: flujo vertical, la ventana entre las dos palabras --- */
+  @media (max-width: 900px) {
+    .stage {
+      display: grid;
+      grid-template-columns: minmax(0, 1fr);
+      height: auto;
+      min-height: 0;
+      max-height: none;
+      padding: 16px var(--gutter) 40px;
+      row-gap: 0;
+    }
+
+    .window {
+      position: relative;
+      inset: auto;
+      order: 2;
+      aspect-ratio: 4 / 3;
+      margin-inline: calc(var(--gutter) * -1);
+      clip-path: inset(0 var(--gutter) 0 var(--gutter));
+    }
+
+    .word {
+      position: relative;
+      inset: auto;
+      font-size: clamp(2.5rem, 12vw, 6.5rem);
+      font-stretch: 108%;
+    }
+
+    .word--a {
+      order: 1;
+      margin-bottom: 12px;
+    }
+
+    .word--b {
+      order: 3;
+      justify-self: end;
+      margin-top: 8px;
+    }
+
+    .info {
+      position: static;
+      order: 4;
+      width: auto;
+      max-width: 560px;
+      margin-top: 32px;
+    }
+
+    .muestras {
+      position: static;
+      order: 5;
+      width: auto;
+      max-width: none;
+      margin-top: 40px;
+    }
+
+    .muestras ul {
+      display: grid;
+      grid-template-columns: repeat(2, minmax(0, 1fr));
+      column-gap: 16px;
+    }
+
+    .ruler {
+      display: none;
+    }
+
+    .window-panel {
+      display: none;
+    }
+  }
+
+  @media (max-width: 480px) {
+    .actions .btn {
+      flex: 1 1 100%;
+    }
+
+    .muestras ul {
+      grid-template-columns: minmax(0, 1fr);
+    }
+  }
+</style>
+
+<script>
+  import { gsap, withMotion } from '../lib/motion';
+
+  const hero = document.querySelector<HTMLElement>('[data-hero]');
+  const stage = hero?.querySelector<HTMLElement>('[data-stage]');
+
+  if (hero && stage) {
+    const q = <T extends Element>(s: string) => stage.querySelector<T>(s)!;
+    const win = q<HTMLElement>('[data-window]');
+    const material = q<HTMLElement>('[data-material] img');
+    const espacio = q<HTMLElement>('[data-espacio]');
+    const espacioImg = q<HTMLElement>('[data-espacio] img');
+    const panel = q<HTMLElement>('[data-panel]');
+    const wordA = q<HTMLElement>('[data-word="a"]');
+    const wordB = q<HTMLElement>('[data-word="b"]');
+    const left = q<HTMLElement>('[data-side="left"]');
+    const right = q<HTMLElement>('[data-side="right"]');
+    const ruler = q<HTMLElement>('[data-ruler]');
+
+    // La imagen del espacio se pide en cuanto la primera está lista
+    espacioImg.setAttribute('loading', 'eager');
+
+    withMotion({ desktop: '(min-width: 901px)', mobile: '(max-width: 900px)' }, (ctx) => {
+      const { desktop } = (ctx as unknown as { conditions: Record<string, boolean> }).conditions;
+
+      // Entrada única, corta: nada espera más de ~0,9 s
+      const intro = gsap.timeline({ defaults: { ease: 'power3.out' } });
+      intro
+        .from([wordA, wordB], { yPercent: 105, duration: 0.8, stagger: 0.08 })
+        .from(material, { scale: 1.25, duration: 1.1 }, 0)
+        .from(win, { opacity: 0, duration: 0.5 }, 0)
+        .from([left, right], { y: 16, opacity: 0, duration: 0.6, stagger: 0.06 }, 0.15);
+
+      if (desktop) {
+        const cs = getComputedStyle(stage);
+        const v = (n: string) => cs.getPropertyValue(n).trim();
+        const start = `inset(${v('--win-top')} ${v('--win-right')} ${v('--win-bottom')} ${v('--win-left')})`;
+
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            scrollTrigger: {
+              trigger: stage,
+              start: 'top top+=72',
+              end: '+=120%',
+              pin: true,
+              scrub: 0.5,
+              anticipatePin: 1,
+              onUpdate: (st) => gsap.set(ruler, { scaleX: st.progress }),
+            },
+          })
+          // 1. el titular se abre y la ventana crece hasta ocupar todo
+          .to(wordA, { xPercent: -115, duration: 0.85 }, 0)
+          .to(wordB, { xPercent: 115, duration: 0.85 }, 0)
+          .to([wordA, wordB], { opacity: 0, duration: 0.2 }, 0.65)
+          .to(left, { x: -120, opacity: 0, duration: 0.5 }, 0)
+          .to(right, { x: 120, opacity: 0, duration: 0.5 }, 0)
+          .fromTo(win, { clipPath: start }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 1 }, 0)
+          .to(material, { scale: 1.08, duration: 1 }, 0)
+          // 2. del material al espacio: el baño sube por encima del ladrillo
+          .fromTo(espacio, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9 }, 0.9)
+          .fromTo(espacioImg, { scale: 1.2 }, { scale: 1, duration: 1.1 }, 0.9)
+          .to(material, { scale: 0.92, filter: 'brightness(0.6)', duration: 0.9 }, 0.9)
+          // 3. panel final sobre la foto
+          .to(panel, { autoAlpha: 1, y: 0, duration: 0.4 }, 1.7)
+          .from(panel, { y: 24, duration: 0.4 }, 1.7);
+      } else {
+        // Móvil: sin fijar; la transición material → espacio sigue al propio scroll del hero
+        gsap
+          .timeline({
+            defaults: { ease: 'none' },
+            // empieza cuando la ventana toca la cabecera: al cargar se ve el material entero
+            scrollTrigger: { trigger: win, start: 'top top+=72', end: 'bottom top+=72', scrub: 0.4 },
+          })
+          .fromTo(espacio, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)' }, 0)
+          .fromTo(espacioImg, { scale: 1.2 }, { scale: 1 }, 0)
+          .to(wordA, { xPercent: -12 }, 0)
+          .to(wordB, { xPercent: 12 }, 0);
+      }
+    });
+  }
+</script>

@@ -1,0 +1,173 @@
+---
+import { negocio } from '../data/negocio';
+
+const nav = [
+  { href: '#materiales', t: 'Materiales' },
+  { href: '#exposicion', t: 'Exposición' },
+  { href: '#como-trabajamos', t: 'Cómo trabajamos' },
+  { href: '#visita', t: 'Visítanos' },
+];
+---
+
+<footer class="footer">
+  <div class="wrap">
+    <div class="arriba">
+      <div class="marca">
+        <p class="logo">{negocio.nombre}</p>
+        <p class="razon">{negocio.razonSocial}</p>
+      </div>
+
+      <div class="col dir">
+        <p class="cab">Dirección</p>
+        <address>
+          {negocio.calle}<br />
+          {negocio.cp} {negocio.localidad}<br />
+          {negocio.provincia}
+        </address>
+      </div>
+
+      <div class="col contacto">
+        <p class="cab">Contacto</p>
+        <ul>
+          <li><a class="link" href={negocio.telefonoHref}>{negocio.telefono}</a></li>
+          <li><a class="link" href={`mailto:${negocio.email}`}>{negocio.email}</a></li>
+        </ul>
+      </div>
+
+      <nav class="col" aria-label="Pie de página">
+        <p class="cab">Navegación</p>
+        <ul>
+          {nav.map((n) => <li><a class="link" href={n.href}>{n.t}</a></li>)}
+        </ul>
+      </nav>
+
+      <div class="col">
+        <p class="cab">Redes</p>
+        <ul>
+          <li><a class="link" href={negocio.instagram} target="_blank" rel="noopener">Instagram</a></li>
+          <li><a class="link" href={negocio.facebook} target="_blank" rel="noopener">Facebook</a></li>
+        </ul>
+      </div>
+    </div>
+
+    <div class="abajo">
+      <p>
+        Demostración conceptual no oficial preparada por Ladea. No es la web de El Palomo ni está publicada con su
+        autorización.
+      </p>
+      <p class="creditos">
+        Fotografías ilustrativas de <a class="link" href="https://unsplash.com/" target="_blank" rel="noopener">Unsplash</a>:
+        Tanner Vote, Sergej, rayne madison, Royale Stones Ireland, Richard Bell, Georg Eiermann, Peter Muniz, Barn
+        Images, Olek Buzunov, Sasun Bughdaryan, Solømen, Matt W Newman, charlesdeluvio y Steffen Lemmerzahl.
+      </p>
+    </div>
+  </div>
+</footer>
+
+<style>
+  .footer {
+    padding-block: clamp(56px, 9vh, 96px) 32px;
+    background: var(--grafito);
+    color: var(--cal);
+  }
+
+  .footer :global(:focus-visible) {
+    outline-color: var(--cal);
+  }
+
+  .arriba {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 40px 24px;
+  }
+
+  .marca {
+    grid-column: 1 / span 3;
+  }
+
+  .logo {
+    font-size: var(--step-2);
+    font-stretch: 118%;
+    font-weight: 820;
+    letter-spacing: -0.03em;
+    line-height: 1;
+  }
+
+  .razon {
+    margin-top: 10px;
+    font-size: var(--step--1);
+    opacity: 0.75;
+  }
+
+  .col {
+    grid-column: span 2;
+    min-width: 0;
+  }
+
+  .contacto {
+    grid-column: span 3;
+  }
+
+  .cab {
+    margin-bottom: 10px;
+    font-size: var(--step--1);
+    font-weight: 600;
+    opacity: 0.7;
+  }
+
+  address {
+    font-style: normal;
+    font-size: var(--step--1);
+    line-height: 1.7;
+  }
+
+  ul {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    font-size: var(--step--1);
+  }
+
+  li a {
+    display: inline-flex;
+    align-items: center;
+    min-height: 44px;
+    overflow-wrap: anywhere;
+  }
+
+  .abajo {
+    display: grid;
+    gap: 10px;
+    margin-top: clamp(40px, 7vh, 72px);
+    padding-top: 24px;
+    border-top: 1px solid color-mix(in srgb, var(--cal) 25%, transparent);
+    font-size: var(--step--1);
+  }
+
+  .creditos {
+    font-size: 0.8125rem;
+    opacity: 0.7;
+  }
+
+  .creditos a {
+    display: inline;
+  }
+
+  @media (max-width: 1000px) {
+    .marca {
+      grid-column: 1 / -1;
+    }
+
+    .col,
+    .contacto {
+      grid-column: span 6;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .col,
+    .contacto {
+      grid-column: 1 / -1;
+    }
+  }
+</style>

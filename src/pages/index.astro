@@ -1,0 +1,27 @@
+---
+import Base from '../layouts/Base.astro';
+import Header from '../components/Header.astro';
+import Hero from '../components/Hero.astro';
+import Presentacion from '../components/Presentacion.astro';
+import Muestrario from '../components/Muestrario.astro';
+import Exposicion from '../components/Exposicion.astro';
+import Proceso from '../components/Proceso.astro';
+import Visita from '../components/Visita.astro';
+import Footer from '../components/Footer.astro';
+---
+
+<Base
+  title="El Palomo · Materiales de construcción en Membrilla (demo Ladea)"
+  description="Almacén familiar de materiales de construcción en Membrilla (Ciudad Real): material básico, pavimentos y revestimientos, baño y ferretería. Demostración conceptual no oficial."
+>
+  <Header />
+  <main id="contenido">
+    <Hero />
+    <Presentacion />
+    <Muestrario />
+    <Exposicion />
+    <Proceso />
+    <Visita />
+  </main>
+  <Footer />
+</Base>

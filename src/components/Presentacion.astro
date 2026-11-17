@@ -1,0 +1,189 @@
+---
+import { negocio } from '../data/negocio';
+
+const titulo = 'Un almacén familiar para quien construye y para quien reforma';
+const palabras = titulo.split(' ');
+
+const [lv, sab] = negocio.horario;
+const horario = `L–V ${lv.horas.replace(/ /g, '')} · S ${sab.horas.replace(/ /g, '')}`;
+
+const ficha = [
+  ['Empresa', 'Familiar, de Membrilla'],
+  ['Dónde', `${negocio.calle}, ${negocio.localidad}`],
+  ['Para', 'Profesionales de la construcción y particulares'],
+  ['Familias', 'Material básico, pavimentos y revestimientos, baño, ferretería'],
+  ['Servicios', 'Asesoramiento, exposición y transporte'],
+  ['Horario', horario],
+];
+---
+
+<section class="presentacion" id="almacen" aria-labelledby="almacen-title">
+  <div class="wrap">
+    <p class="kicker">El almacén</p>
+
+    <div class="body">
+      <div class="texto">
+        <h2 id="almacen-title" data-manifiesto>
+          {palabras.map((p, i) => <><span class="w">{p}</span>{i < palabras.length - 1 ? ' ' : ''}</>)}
+        </h2>
+        <p class="lead">
+          El Palomo es una empresa familiar de Membrilla. En el almacén de la calle Don Quijote hay material para
+          levantar una obra y para terminarla: del árido y el cemento a la cerámica, el baño y la ferretería.
+        </p>
+        <div class="dos">
+          <div class="col">
+            <h3>Si eres profesional</h3>
+            <p>
+              Material básico, prefabricados, fontanería, electricidad y herramienta en un mismo sitio. Consulta
+              disponibilidad por teléfono.
+            </p>
+          </div>
+          <div class="col">
+            <h3>Si vas a reformar</h3>
+            <p>
+              Ven a la exposición y cuéntanos qué tienes en mente. Te aconsejamos sobre el material que mejor encaja
+              con tu obra.
+            </p>
+          </div>
+        </div>
+      </div>
+
+      <aside class="ficha" aria-label="Ficha del almacén">
+        <div class="regla" aria-hidden="true"></div>
+        <dl>
+          {
+            ficha.map(([k, v]) => (
+              <div class="fila">
+                <dt>{k}</dt>
+                <dd>{v}</dd>
+              </div>
+            ))
+          }
+        </dl>
+      </aside>
+    </div>
+  </div>
+</section>
+
+<style>
+  .presentacion {
+    padding-block: clamp(80px, 12vh, 140px);
+  }
+
+  .body {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 48px 24px;
+    align-items: start;
+    margin-top: clamp(8px, 2vh, 20px);
+  }
+
+  .ficha {
+    grid-column: 1 / span 4;
+    grid-row: 1;
+  }
+
+  .texto {
+    grid-column: 6 / -1;
+    grid-row: 1;
+    display: grid;
+    gap: clamp(32px, 6vh, 56px);
+  }
+
+  h2 {
+    font-size: var(--step-3);
+    font-weight: 700;
+    font-stretch: 108%;
+  }
+
+  .regla {
+    height: 14px;
+    border-bottom: 1px solid var(--grafito);
+    background:
+      repeating-linear-gradient(90deg, var(--grafito) 0 1px, transparent 1px 40px) bottom / 100% 14px no-repeat,
+      repeating-linear-gradient(90deg, var(--grafito) 0 1px, transparent 1px 8px) bottom / 100% 7px no-repeat;
+  }
+
+  dl {
+    margin: 0;
+    font-size: var(--step--1);
+  }
+
+  .fila {
+    display: grid;
+    grid-template-columns: 5.5rem 1fr;
+    gap: 12px;
+    padding-block: 14px;
+    border-bottom: 1px solid var(--linea);
+  }
+
+  dt {
+    color: var(--cemento);
+    font-weight: 600;
+    font-stretch: 90%;
+  }
+
+  dd {
+    margin: 0;
+    font-weight: 540;
+  }
+
+  .dos {
+    display: grid;
+    grid-template-columns: repeat(2, minmax(0, 1fr));
+    gap: 24px;
+  }
+
+  .col {
+    padding-top: 18px;
+    border-top: 1px solid var(--grafito);
+  }
+
+  h3 {
+    margin-bottom: 10px;
+    font-size: var(--step-1);
+    line-height: 1.1;
+  }
+
+  .col p {
+    color: var(--cemento);
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    .ficha,
+    .texto {
+      grid-column: 1 / -1;
+      grid-row: auto;
+    }
+  }
+
+  @media (max-width: 600px) {
+    .dos {
+      grid-template-columns: 1fr;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, withMotion } from '../lib/motion';
+
+  const h2 = document.querySelector<HTMLElement>('[data-manifiesto]');
+  if (h2) {
+    withMotion({ all: '(min-width: 0px)' }, () => {
+      const css = getComputedStyle(document.documentElement);
+      const from = css.getPropertyValue('--linea').trim();
+      const to = css.getPropertyValue('--grafito').trim();
+      gsap.fromTo(
+        h2.querySelectorAll('.w'),
+        { color: from },
+        {
+          color: to,
+          ease: 'none',
+          stagger: 0.12,
+          scrollTrigger: { trigger: h2, start: 'top 80%', end: 'bottom 45%', scrub: true },
+        },
+      );
+    });
+  }
+</script>

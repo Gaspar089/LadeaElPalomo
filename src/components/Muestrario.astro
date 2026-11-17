@@ -1,0 +1,815 @@
+---
+import { Picture } from 'astro:assets';
+import bloques from '../assets/img/bloques.jpg';
+import aridos from '../assets/img/aridos.jpg';
+import yeso from '../assets/img/yeso.jpg';
+import hidraulico from '../assets/img/hidraulico.jpg';
+import muestras from '../assets/img/muestras.jpg';
+import pavimento from '../assets/img/pavimento.jpg';
+import bano from '../assets/img/bano.jpg';
+import bano2 from '../assets/img/bano2.jpg';
+import herramientas from '../assets/img/herramientas.jpg';
+import instalaciones from '../assets/img/instalaciones.jpg';
+
+// Familias y subfamilias publicadas en la web de El Palomo (ver RESEARCH.md).
+// capas[0] es la principal; las siguientes son "muestras" que se solapan.
+const familias = [
+  {
+    id: 'basico',
+    nombre: 'Material básico',
+    texto: 'Lo que se gasta cada día en obra, a mano en el almacén.',
+    items: ['Áridos', 'Cementos', 'Yeso y cola', 'Placas de yeso', 'Prefabricados'],
+    capas: [
+      { img: bloques, alt: 'Palés de bloques de hormigón apilados en un patio', pos: '50% 60%' },
+      { img: aridos, alt: 'Grava gris vista de cerca', pos: '50% 50%' },
+      { img: yeso, alt: 'Manos alisando yeso en una pared con dos llanas', pos: '50% 50%' },
+    ],
+  },
+  {
+    id: 'ceramica',
+    nombre: 'Pavimentos y revestimientos',
+    texto: 'Cerámica para suelos y paredes, con piezas que se pueden ver en la exposición.',
+    items: ['Pavimentos', 'Revestimientos', 'Cerámica'],
+    capas: [
+      { img: hidraulico, alt: 'Pared de azulejos de dibujos variados en azul, ocre y blanco', pos: '50% 50%' },
+      { img: muestras, alt: 'Estantería con muestras de cerámica de colores', pos: '50% 50%' },
+      { img: pavimento, alt: 'Baño revestido en mármol gris veteado', pos: '50% 50%' },
+    ],
+  },
+  {
+    id: 'bano',
+    nombre: 'Baño',
+    texto: 'Todo lo que lleva un cuarto de baño, del sanitario a los accesorios.',
+    items: ['Muebles de baño', 'Mamparas', 'Sanitarios', 'Accesorios y complementos'],
+    capas: [
+      { img: bano, alt: 'Lavabo de piedra con grifería negra y espejo de arco', pos: '50% 45%' },
+      { img: bano2, alt: 'Lavabo de hormigón con grifería negra empotrada', pos: '50% 50%' },
+    ],
+  },
+  {
+    id: 'ferreteria',
+    nombre: 'Ferretería',
+    texto: 'Para profesionales y para el arreglo de casa.',
+    items: ['Fontanería', 'Herramientas', 'Electricidad'],
+    capas: [
+      { img: herramientas, alt: 'Herramientas de mano colgadas en un panel de taller', pos: '50% 50%' },
+      {
+        img: instalaciones,
+        alt: 'Tuberías de fontanería y tubos eléctricos en una pared en obra',
+        pos: '50% 50%',
+      },
+    ],
+  },
+];
+
+const pad = (n: number) => String(n).padStart(2, '0');
+// widths/sizes por capa (0 principal, 1 y 2 muestras)
+const anchos = [[480, 720, 1000], [320, 480, 640], [320, 480, 640]];
+const sizesStage = ['46vw', '20vw', '16vw'];
+const sizesRail = ['68vw', '34vw', '26vw'];
+---
+
+<section class="muestrario" id="materiales" aria-labelledby="materiales-title" data-muestrario>
+  <div class="wrap">
+    <div class="head">
+      <p class="kicker">Materiales</p>
+      <h2 id="materiales-title">Lo que hay en el almacén, por familias</h2>
+    </div>
+
+    <!-- Móvil y tableta: chips + raíl táctil -->
+    <div class="chips" data-chips role="group" aria-label="Familias de material">
+      {
+        familias.map((f, i) => (
+          <button
+            class="chip"
+            type="button"
+            aria-pressed={i === 0 ? 'true' : 'false'}
+            aria-controls={`ficha-${f.id}`}
+            data-chip={f.id}
+          >
+            {f.nombre}
+          </button>
+        ))
+      }
+    </div>
+
+    <div class="rail-wrap" data-rail-wrap>
+      <div class="rail" data-rail tabindex="0" role="region" aria-label="Familias de material, desliza para ver más">
+        {
+          familias.map((f, i) => (
+            <article class="card" id={`ficha-${f.id}`} data-card={f.id}>
+              <div class="comp mini">
+                {f.capas.map((c, k) => (
+                  <div class={`depth d${k}`}>
+                    <div class="layer" data-sample={k > 0 ? '' : undefined}>
+                      <Picture
+                        src={c.img}
+                        formats={['avif', 'webp']}
+                        widths={anchos[k]}
+                        sizes={sizesRail[k]}
+                        alt={c.alt}
+                        loading="lazy"
+                        style={`object-position:${c.pos}`}
+                      />
+                    </div>
+                  </div>
+                ))}
+              </div>
+              <div class="card-head">
+                <span class="num">{pad(i + 1)}</span>
+                <h3 class="card-name">{f.nombre}</h3>
+              </div>
+              <p class="card-text">{f.texto}</p>
+              <ul class="items">
+                {f.items.map((it) => (
+                  <li>{it}</li>
+                ))}
+              </ul>
+            </article>
+          ))
+        }
+      </div>
+      <div class="rule" aria-hidden="true"></div>
+    </div>
+
+    <!-- Escritorio: lista + escenario -->
+    <div class="panel">
+      <div class="index-col">
+        <p class="counter" aria-hidden="true">
+          <span data-count>01</span><span class="of"> / {pad(familias.length)}</span>
+        </p>
+        <ol class="index">
+          {
+            familias.map((f, i) => (
+              <li class="row" data-row={f.id}>
+                <button
+                  class="row-btn"
+                  type="button"
+                  aria-pressed={i === 0 ? 'true' : 'false'}
+                  aria-controls="muestrario-escenario"
+                  data-target={f.id}
+                >
+                  <span class="num">{pad(i + 1)}</span>
+                  <span class="name">{f.nombre}</span>
+                </button>
+                <div class="detail">
+                  <div class="detail-in">
+                    <div class="detail-pad">
+                      <p>{f.texto}</p>
+                      <ul class="items">
+                        {f.items.map((it) => (
+                          <li>{it}</li>
+                        ))}
+                      </ul>
+                    </div>
+                  </div>
+                </div>
+              </li>
+            ))
+          }
+        </ol>
+      </div>
+
+      <div class="stage" id="muestrario-escenario" data-stage>
+        {
+          familias.map((f, i) => (
+            <div class="stack comp" data-stack={f.id} data-active={i === 0 ? '' : undefined}>
+              <p class="nm" aria-hidden="true">
+                <span class="nm-in">{f.nombre}</span>
+              </p>
+              {f.capas.map((c, k) => (
+                <div class={`depth d${k}`} data-depth={k}>
+                  <div class="layer">
+                    <Picture
+                      src={c.img}
+                      formats={['avif', 'webp']}
+                      widths={anchos[k]}
+                      sizes={sizesStage[k]}
+                      alt={c.alt}
+                      loading={i === 0 ? 'eager' : 'lazy'}
+                      style={`object-position:${c.pos}`}
+                    />
+                  </div>
+                </div>
+              ))}
+            </div>
+          ))
+        }
+      </div>
+    </div>
+  </div>
+</section>
+
+<style>
+  .muestrario {
+    padding-block: clamp(80px, 12vh, 140px);
+    background: var(--piedra);
+  }
+
+  .head {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 0 24px;
+    margin-bottom: clamp(36px, 6vh, 64px);
+  }
+
+  .head .kicker {
+    grid-column: 1 / -1;
+  }
+
+  h2 {
+    grid-column: 1 / span 8;
+    font-size: var(--step-3);
+  }
+
+  .num {
+    color: var(--cemento);
+    font-size: 1rem;
+    font-weight: 600;
+    font-stretch: 70%;
+    font-variant-numeric: tabular-nums;
+    transition: color 200ms ease;
+  }
+
+  .items {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 4px 0;
+    margin: 8px 0 0;
+    padding: 0;
+    list-style: none;
+    color: var(--grafito);
+    font-weight: 560;
+  }
+
+  .items li:not(:last-child)::after {
+    content: '/';
+    margin-inline: 10px;
+    color: var(--cemento);
+  }
+
+  /* ---------- Composición de capas (escenario y ficha móvil) ---------- */
+  .comp {
+    --mh: 86%;
+  }
+
+  .depth {
+    position: absolute;
+  }
+
+  .d0 {
+    left: 0;
+    bottom: 0;
+    width: 78%;
+    height: var(--mh);
+    z-index: 1;
+  }
+
+  .d1 {
+    top: 0;
+    right: 0;
+    width: 38%;
+    aspect-ratio: 1;
+    z-index: 2;
+    filter: drop-shadow(0 16px 16px rgb(0 0 0 / 0.22));
+  }
+
+  .d2 {
+    right: 2%;
+    bottom: 4%;
+    width: 30%;
+    aspect-ratio: 4 / 5;
+    z-index: 2;
+    filter: drop-shadow(0 16px 16px rgb(0 0 0 / 0.22));
+  }
+
+  .layer {
+    position: absolute;
+    inset: 0;
+    overflow: hidden;
+    background: var(--linea);
+  }
+
+  .layer :global(img) {
+    width: 100%;
+    height: 100%;
+    object-fit: cover;
+  }
+
+  /* ---------- Escritorio ---------- */
+  .panel {
+    display: grid;
+    grid-template-columns: repeat(12, minmax(0, 1fr));
+    gap: 24px;
+    align-items: start;
+  }
+
+  .index-col {
+    grid-column: 1 / span 5;
+  }
+
+  .counter {
+    margin-bottom: clamp(16px, 3vh, 32px);
+    font-size: var(--step-3);
+    font-weight: 600;
+    font-stretch: 70%;
+    line-height: 1;
+    font-variant-numeric: tabular-nums;
+  }
+
+  .counter .of {
+    color: var(--cemento);
+  }
+
+  .index {
+    margin: 0;
+    padding: 0;
+    list-style: none;
+    border-top: 1px solid var(--grafito);
+  }
+
+  .row {
+    border-bottom: 1px solid var(--linea);
+  }
+
+  .row-btn {
+    display: grid;
+    grid-template-columns: 3.2rem 1fr;
+    align-items: baseline;
+    width: 100%;
+    min-height: 44px;
+    padding: clamp(18px, 2.6vh, 26px) 0 10px;
+    border: 0;
+    background: none;
+    color: inherit;
+    font: inherit;
+    text-align: left;
+    cursor: pointer;
+  }
+
+  .name {
+    font-size: var(--step-2);
+    font-weight: 720;
+    font-stretch: 110%;
+    letter-spacing: -0.025em;
+    line-height: 1.05;
+    transition:
+      color 200ms ease,
+      transform 300ms var(--ease-out);
+  }
+
+  .row-btn[aria-pressed='true'] .num {
+    color: var(--rojo);
+  }
+
+  .row-btn[aria-pressed='true'] .name {
+    color: var(--azul);
+  }
+
+  @media (hover: hover) {
+    .row-btn:hover .name {
+      transform: translateX(6px);
+    }
+  }
+
+  /* Altura animada 0fr -> 1fr */
+  .detail {
+    display: grid;
+    grid-template-rows: 0fr;
+    visibility: hidden;
+    transition:
+      grid-template-rows 400ms var(--ease-out),
+      visibility 0s 400ms;
+  }
+
+  .row-btn[aria-pressed='true'] + .detail {
+    grid-template-rows: 1fr;
+    visibility: visible;
+    transition:
+      grid-template-rows 400ms var(--ease-out),
+      visibility 0s;
+  }
+
+  .detail-in {
+    min-height: 0;
+    overflow: hidden;
+  }
+
+  .detail-pad {
+    padding: 0 0 clamp(18px, 2.6vh, 26px) 3.2rem;
+    color: var(--cemento);
+    font-size: var(--step--1);
+  }
+
+  .stage {
+    position: sticky;
+    top: calc(var(--header-h) + 24px);
+    grid-column: 6 / -1;
+    height: min(78svh, 720px);
+    isolation: isolate;
+  }
+
+  .stack {
+    --mh: 80%;
+    position: absolute;
+    inset: 0;
+    visibility: hidden;
+  }
+
+  .stack[data-active] {
+    visibility: visible;
+  }
+
+  .nm {
+    position: absolute;
+    top: 0;
+    left: 0;
+    z-index: 3;
+    width: 62%;
+    margin: 0;
+    padding-bottom: 0.1em;
+    overflow: hidden;
+    color: var(--grafito);
+    font-size: calc(var(--step-3) * 0.82);
+    font-weight: 800;
+    font-stretch: 116%;
+    letter-spacing: -0.025em;
+    line-height: 1.02;
+    text-wrap: balance;
+  }
+
+  .nm-in {
+    display: block;
+  }
+
+  /* ---------- Móvil y tableta ---------- */
+  .chips,
+  .rail-wrap {
+    display: none;
+  }
+
+  .items li {
+    font-size: var(--step--1);
+  }
+
+  @media (max-width: 900px) {
+    h2 {
+      grid-column: 1 / -1;
+    }
+
+    .panel {
+      display: none;
+    }
+
+    .chips {
+      position: sticky;
+      top: var(--header-h);
+      z-index: 5;
+      display: flex;
+      gap: 8px;
+      margin-inline: calc(var(--gutter) * -1);
+      padding: 10px var(--gutter);
+      overflow-x: auto;
+      background: var(--piedra);
+      scrollbar-width: none;
+    }
+
+    .chips::-webkit-scrollbar,
+    .rail::-webkit-scrollbar {
+      display: none;
+    }
+
+    .chip {
+      flex: none;
+      min-height: 44px;
+      padding-inline: 16px;
+      border: 1.5px solid var(--grafito);
+      background: transparent;
+      color: var(--grafito);
+      font: inherit;
+      font-size: var(--step--1);
+      font-weight: 620;
+      white-space: nowrap;
+      cursor: pointer;
+      transition:
+        background-color 200ms ease,
+        color 200ms ease;
+    }
+
+    .chip[aria-pressed='true'] {
+      background: var(--grafito);
+      color: var(--cal);
+    }
+
+    .rail-wrap {
+      display: block;
+      margin-top: 20px;
+    }
+
+    .rail {
+      display: flex;
+      gap: 12px;
+      margin-inline: calc(var(--gutter) * -1);
+      padding-inline: var(--gutter);
+      overflow-x: auto;
+      scroll-snap-type: x mandatory;
+      scroll-padding-inline: var(--gutter);
+      overscroll-behavior-x: contain;
+      scrollbar-width: none;
+    }
+
+    .card {
+      flex: 0 0 86vw;
+      scroll-snap-align: center;
+      scroll-snap-stop: always;
+    }
+
+    .mini {
+      position: relative;
+      aspect-ratio: 4 / 5;
+    }
+
+    .card-head {
+      display: grid;
+      grid-template-columns: 2.4rem 1fr;
+      align-items: baseline;
+      margin-top: 20px;
+    }
+
+    .card-name {
+      font-size: var(--step-2);
+      font-weight: 720;
+      line-height: 1.05;
+    }
+
+    .card-text {
+      margin-top: 8px;
+      padding-left: 2.4rem;
+      color: var(--cemento);
+      font-size: var(--step--1);
+    }
+
+    .card .items {
+      padding-left: 2.4rem;
+    }
+
+    /* Regla: marcas largas por ficha, cortas intermedias, tramo rojo según scrollLeft */
+    .rule {
+      --p: 0;
+      position: relative;
+      height: 16px;
+      margin-top: 22px;
+      border-bottom: 1px solid var(--grafito);
+      border-right: 1px solid var(--grafito);
+      background:
+        repeating-linear-gradient(90deg, var(--grafito) 0 1px, transparent 1px 33.3333%) bottom / 100% 16px no-repeat,
+        repeating-linear-gradient(90deg, var(--grafito) 0 1px, transparent 1px 8.3333%) bottom / 100% 8px no-repeat;
+    }
+
+    .rule::after {
+      content: '';
+      position: absolute;
+      bottom: -1px;
+      left: calc(var(--p) * 75%);
+      width: 25%;
+      height: 4px;
+      background: var(--rojo);
+    }
+  }
+
+  @media (prefers-reduced-motion: reduce) {
+    .detail,
+    .row-btn[aria-pressed='true'] + .detail {
+      transition: none;
+    }
+  }
+</style>
+
+<script>
+  import { gsap, withMotion, EASE } from '../lib/motion';
+
+  const root = document.querySelector<HTMLElement>('[data-muestrario]');
+  if (root) {
+    const all = <T extends HTMLElement>(sel: string, from: ParentNode = root) => [...from.querySelectorAll<T>(sel)];
+    const rows = all<HTMLButtonElement>('[data-target]');
+    const chips = all<HTMLButtonElement>('[data-chip]');
+    const stacks = all('[data-stack]');
+    const cards = all('[data-card]');
+    const count = root.querySelector<HTMLElement>('[data-count]')!;
+    const stage = root.querySelector<HTMLElement>('[data-stage]')!;
+    const rail = root.querySelector<HTMLElement>('[data-rail]')!;
+    const railWrap = root.querySelector<HTMLElement>('[data-rail-wrap]')!;
+    const chipBar = root.querySelector<HTMLElement>('[data-chips]')!;
+    const ids = rows.map((b) => b.dataset.target!);
+    const desktop = matchMedia('(min-width: 901px)');
+    const reducedQ = matchMedia('(prefers-reduced-motion: reduce)');
+
+    let current = ids[0];
+    let anim = false;
+    let tl: gsap.core.Timeline | null = null;
+
+    const stackOf = (id: string) => {
+      const el = stacks.find((s) => s.dataset.stack === id)!;
+      return { el, layers: all('.layer', el), name: el.querySelector<HTMLElement>('.nm-in')! };
+    };
+
+    // Estado funcional sin GSAP: atributos
+    const setState = (id: string) => {
+      current = id;
+      rows.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.target === id)));
+      chips.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.chip === id)));
+      stacks.forEach((s) => s.toggleAttribute('data-active', s.dataset.stack === id));
+      count.textContent = String(ids.indexOf(id) + 1).padStart(2, '0');
+    };
+
+    const reset = () => {
+      const els: HTMLElement[] = [count];
+      stacks.forEach((s) => {
+        const p = stackOf(s.dataset.stack!);
+        els.push(...p.layers, p.name);
+      });
+      gsap.set(els, { clearProps: 'all' });
+      gsap.set(stacks, { clearProps: 'visibility,zIndex' });
+    };
+
+    const out = [
+      { x: -10, y: -20 },
+      { x: 16, y: -20 },
+      { x: -16, y: -20 },
+    ];
+
+    const play = (prevId: string, id: string) => {
+      tl?.kill();
+      reset();
+      const P = stackOf(prevId);
+      const N = stackOf(id);
+      gsap.set(P.el, { visibility: 'visible', zIndex: 1 });
+      gsap.set(N.el, { visibility: 'visible', zIndex: 2 });
+      const full = 'inset(0% 0% 0% 0%)';
+      tl = gsap.timeline({ onComplete: reset });
+      P.layers.forEach((l, i) =>
+        tl!.fromTo(
+          l,
+          { clipPath: full, x: 0, y: 0 },
+          { ...out[i], clipPath: 'inset(0% 0% 100% 0%)', duration: 0.45, ease: 'power2.in' },
+          0,
+        ),
+      );
+      tl.fromTo(P.name, { yPercent: 0 }, { yPercent: -110, duration: 0.35, ease: 'power2.in' }, 0);
+      tl.fromTo(
+        N.layers[0],
+        { clipPath: 'polygon(0% 100%, 0% 100%, 28% 100%, 0% 72%)' },
+        { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', duration: 0.8, ease: EASE },
+        0.1,
+      );
+      N.layers.slice(1).forEach((l, i) =>
+        tl!.fromTo(
+          l,
+          { y: 40, clipPath: 'inset(100% 0% 0% 0%)' },
+          { y: 0, clipPath: full, duration: 0.7, ease: EASE },
+          i === 0 ? 0.2 : 0.28,
+        ),
+      );
+      tl.fromTo(N.name, { yPercent: 110 }, { yPercent: 0, duration: 0.5, ease: EASE }, 0.15);
+      tl.fromTo(count, { yPercent: 40, opacity: 0 }, { yPercent: 0, opacity: 1, duration: 0.4, ease: EASE }, 0);
+    };
+
+    const activate = (id: string) => {
+      if (id === current) return;
+      const prev = current;
+      setState(id);
+      if (anim) play(prev, id);
+    };
+
+    // Escritorio: click, foco y hover con retardo cancelable
+    let timer = 0;
+    rows.forEach((b) => {
+      const id = b.dataset.target!;
+      b.addEventListener('click', () => activate(id));
+      b.addEventListener('focus', () => desktop.matches && activate(id));
+      const li = b.closest('li')!;
+      li.addEventListener('pointerenter', (e) => {
+        if (!desktop.matches || e.pointerType !== 'mouse') return;
+        clearTimeout(timer);
+        timer = window.setTimeout(() => activate(id), 120);
+      });
+      li.addEventListener('pointerleave', () => clearTimeout(timer));
+    });
+
+    // Móvil: chips -> ficha
+    chips.forEach((c) => {
+      c.addEventListener('click', () => {
+        const id = c.dataset.chip!;
+        setState(id);
+        cards
+          .find((k) => k.dataset.card === id)
+          ?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reducedQ.matches ? 'auto' : 'smooth' });
+      });
+    });
+
+    // Móvil: ficha centrada -> chip activo y entrada de muestras
+    let reveal: ((c: HTMLElement) => void) | null = null;
+    const io = new IntersectionObserver(
+      (entries) => {
+        for (const e of entries) {
+          const card = e.target as HTMLElement;
+          if (e.intersectionRatio >= 0.35) reveal?.(card);
+          if (e.intersectionRatio >= 0.6 && !desktop.matches) {
+            setState(card.dataset.card!);
+            const chip = chips.find((c) => c.dataset.chip === card.dataset.card)!;
+            chipBar.scrollTo({
+              left: chip.offsetLeft - (chipBar.clientWidth - chip.offsetWidth) / 2,
+              behavior: reducedQ.matches ? 'auto' : 'smooth',
+            });
+          }
+        }
+      },
+      { root: rail, threshold: [0.35, 0.6] },
+    );
+    cards.forEach((c) => io.observe(c));
+
+    // Regla: --p según scrollLeft, sin GSAP
+    let raf = 0;
+    rail.addEventListener(
+      'scroll',
+      () => {
+        if (raf) return;
+        raf = requestAnimationFrame(() => {
+          raf = 0;
+          const max = rail.scrollWidth - rail.clientWidth;
+          railWrap.style.setProperty('--p', String(max > 0 ? Math.min(1, rail.scrollLeft / max) : 0));
+        });
+      },
+      { passive: true },
+    );
+
+    // Precarga: al acercarse la sección, el resto de imágenes del escenario pasan a eager (solo escritorio)
+    const preload = new IntersectionObserver(
+      ([e]) => {
+        if (!e.isIntersecting) return;
+        preload.disconnect();
+        if (desktop.matches) stage.querySelectorAll('img').forEach((i) => i.setAttribute('loading', 'eager'));
+      },
+      { rootMargin: '400px' },
+    );
+    preload.observe(root);
+
+    // GSAP: transición del escenario
+    withMotion({ desktop: '(min-width: 901px)' }, () => {
+      anim = true;
+      return () => {
+        anim = false;
+        tl?.kill();
+        reset();
+      };
+    });
+
+    // GSAP: entrada de muestras en el raíl
+    withMotion({ touch: '(max-width: 900px)' }, () => {
+      const seen = new Set<HTMLElement>([cards[0]]);
+      const samples = (c: HTMLElement) => all('[data-sample]', c);
+      cards.slice(1).forEach((c) => gsap.set(samples(c), { opacity: 0, y: 16 }));
+      reveal = (c) => {
+        if (seen.has(c)) return;
+        seen.add(c);
+        gsap.to(samples(c), { opacity: 1, y: 0, duration: 0.6, ease: EASE, stagger: 0.08 });
+      };
+      return () => {
+        reveal = null;
+      };
+    });
+
+    // GSAP: profundidad con puntero
+    withMotion({ fine: '(min-width: 901px) and (hover: hover) and (pointer: fine)' }, () => {
+      const amounts = [6, 16, 24];
+      const movers = all('.depth', stage).map((d) => {
+        const a = amounts[Number(d.dataset.depth)];
+        return {
+          a,
+          x: gsap.quickTo(d, 'x', { duration: 0.6, ease: 'power3' }),
+          y: gsap.quickTo(d, 'y', { duration: 0.6, ease: 'power3' }),
+        };
+      });
+      const move = (e: PointerEvent) => {
+        const r = stage.getBoundingClientRect();
+        const nx = ((e.clientX - r.left) / r.width - 0.5) * 2;
+        const ny = ((e.clientY - r.top) / r.height - 0.5) * 2;
+        movers.forEach((m) => {
+          m.x(nx * m.a);
+          m.y(ny * m.a);
+        });
+      };
+      const leave = () =>
+        movers.forEach((m) => {
+          m.x(0);
+          m.y(0);
+        });
+      stage.addEventListener('pointermove', move);
+      stage.addEventListener('pointerleave', leave);
+      return () => {
+        stage.removeEventListener('pointermove', move);
+        stage.removeEventListener('pointerleave', leave);
+      };
+    });
+  }
+</script>

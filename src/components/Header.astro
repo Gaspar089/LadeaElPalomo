@@ -1,0 +1,288 @@
+---
+import { negocio } from '../data/negocio';
+
+const enlaces = [
+  { href: '#materiales', texto: 'Materiales' },
+  { href: '#exposicion', texto: 'Exposición' },
+  { href: '#como-trabajamos', texto: 'Cómo trabajamos' },
+  { href: '#visita', texto: 'Visítanos' },
+];
+---
+
+<header class="site-header" data-header>
+  <div class="wrap bar">
+    <a class="brand" href="#top" aria-label="El Palomo, inicio">
+      <span class="brand-mark" aria-hidden="true"></span>
+      <span class="brand-name">El Palomo</span>
+      <span class="brand-sub">Materiales de construcción</span>
+    </a>
+
+    <nav class="nav" id="menu" aria-label="Principal">
+      <ul>
+        {enlaces.map((e) => <li><a href={e.href}>{e.texto}</a></li>)}
+      </ul>
+      <a class="nav-call" href={negocio.telefonoHref}>
+        <span class="nav-call-label">Llamar</span>
+        <span>{negocio.telefono}</span>
+      </a>
+    </nav>
+
+    <button class="menu-btn" type="button" aria-expanded="false" aria-controls="menu" data-menu-btn>
+      <span class="visually-hidden">Abrir menú</span>
+      <span class="menu-icon" aria-hidden="true"></span>
+    </button>
+  </div>
+</header>
+
+<style>
+  .site-header {
+    position: sticky;
+    top: 0;
+    z-index: 50;
+    background: var(--cal);
+    border-bottom: 1px solid transparent;
+    transition: border-color 200ms ease;
+  }
+
+  .site-header[data-scrolled] {
+    border-bottom-color: var(--linea);
+  }
+
+  .bar {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    gap: 24px;
+    height: var(--header-h);
+  }
+
+  .brand {
+    display: grid;
+    grid-template-columns: auto auto;
+    column-gap: 10px;
+    align-items: center;
+    min-height: 48px;
+    text-decoration: none;
+    line-height: 1;
+  }
+
+  /* Marca tipográfica provisional; sustituir por el logotipo oficial con permiso */
+  .brand-mark {
+    grid-row: span 2;
+    width: 14px;
+    height: 34px;
+    background: linear-gradient(var(--rojo) 0 50%, var(--azul) 50% 100%);
+  }
+
+  .brand-name {
+    font-size: 1.32rem;
+    font-weight: 820;
+    font-stretch: 118%;
+    letter-spacing: -0.03em;
+  }
+
+  .brand-sub {
+    margin-top: 3px;
+    color: var(--cemento);
+    font-size: 0.75rem;
+    font-weight: 520;
+    font-stretch: 90%;
+  }
+
+  .nav {
+    display: flex;
+    align-items: center;
+    gap: clamp(20px, 3vw, 40px);
+  }
+
+  .nav ul {
+    display: flex;
+    gap: clamp(16px, 2.4vw, 32px);
+    margin: 0;
+    padding: 0;
+    list-style: none;
+  }
+
+  .nav ul a {
+    position: relative;
+    display: inline-block;
+    padding: 10px 0;
+    font-size: 0.95rem;
+    font-weight: 560;
+    text-decoration: none;
+  }
+
+  .nav ul a::after {
+    content: '';
+    position: absolute;
+    left: 0;
+    right: 0;
+    bottom: 4px;
+    height: 2px;
+    background: var(--rojo);
+    transform: scaleX(0);
+    transform-origin: right;
+    transition: transform 260ms var(--ease-out);
+  }
+
+  .nav ul a:hover::after {
+    transform: scaleX(1);
+    transform-origin: left;
+  }
+
+  .nav-call {
+    display: inline-flex;
+    flex-direction: column;
+    justify-content: center;
+    min-height: 48px;
+    padding: 6px 16px;
+    background: var(--azul);
+    color: var(--cal);
+    font-size: 1rem;
+    font-weight: 680;
+    font-variant-numeric: tabular-nums;
+    line-height: 1.15;
+    text-decoration: none;
+    transition: background-color 200ms ease;
+  }
+
+  .nav-call:hover {
+    background: var(--azul-hondo);
+  }
+
+  .nav-call-label {
+    font-size: 0.72rem;
+    font-weight: 500;
+    opacity: 0.8;
+  }
+
+  .menu-btn {
+    display: none;
+  }
+
+  @media (max-width: 900px) {
+    .brand-sub {
+      display: none;
+    }
+
+    .menu-btn {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      margin-right: -10px;
+      border: 0;
+      background: none;
+      color: var(--grafito);
+      cursor: pointer;
+    }
+
+    .menu-icon,
+    .menu-icon::before {
+      display: block;
+      width: 24px;
+      height: 2px;
+      background: currentColor;
+      transition: transform 240ms var(--ease-out);
+    }
+
+    .menu-icon {
+      position: relative;
+      transform: translateY(-4px);
+    }
+
+    .menu-icon::before {
+      content: '';
+      position: absolute;
+      top: 8px;
+    }
+
+    [aria-expanded='true'] .menu-icon {
+      transform: translateY(0) rotate(45deg);
+    }
+
+    [aria-expanded='true'] .menu-icon::before {
+      transform: translateY(-8px) rotate(-90deg);
+    }
+
+    .nav {
+      position: fixed;
+      inset: var(--header-h) 0 0 0;
+      flex-direction: column;
+      align-items: stretch;
+      justify-content: space-between;
+      gap: 32px;
+      padding: 24px var(--gutter) calc(32px + env(safe-area-inset-bottom));
+      background: var(--cal);
+      visibility: hidden;
+      opacity: 0;
+      transform: translateY(-8px);
+      transition:
+        opacity 220ms ease,
+        transform 220ms var(--ease-out),
+        visibility 0s 220ms;
+    }
+
+    .nav[data-open] {
+      visibility: visible;
+      opacity: 1;
+      transform: none;
+      transition:
+        opacity 220ms ease,
+        transform 220ms var(--ease-out);
+    }
+
+    .nav ul {
+      flex-direction: column;
+      gap: 0;
+    }
+
+    .nav ul a {
+      display: block;
+      padding: 14px 0;
+      border-bottom: 1px solid var(--linea);
+      font-size: 1.9rem;
+      font-weight: 720;
+      font-stretch: 112%;
+      letter-spacing: -0.02em;
+    }
+
+    .nav ul a::after {
+      display: none;
+    }
+
+    .nav-call {
+      min-height: 64px;
+      font-size: 1.25rem;
+    }
+  }
+</style>
+
+<script>
+  const header = document.querySelector<HTMLElement>('[data-header]');
+  const btn = document.querySelector<HTMLButtonElement>('[data-menu-btn]');
+  const nav = document.getElementById('menu');
+
+  const onScroll = () => header?.toggleAttribute('data-scrolled', window.scrollY > 8);
+  onScroll();
+  window.addEventListener('scroll', onScroll, { passive: true });
+
+  const setOpen = (open: boolean) => {
+    btn?.setAttribute('aria-expanded', String(open));
+    btn?.querySelector('.visually-hidden')!.replaceChildren(open ? 'Cerrar menú' : 'Abrir menú');
+    nav?.toggleAttribute('data-open', open);
+    document.documentElement.style.overflow = open ? 'hidden' : '';
+  };
+
+  btn?.addEventListener('click', () => setOpen(btn.getAttribute('aria-expanded') !== 'true'));
+  nav?.addEventListener('click', (e) => {
+    if ((e.target as HTMLElement).closest('a')) setOpen(false);
+  });
+  document.addEventListener('keydown', (e) => {
+    if (e.key === 'Escape' && btn?.getAttribute('aria-expanded') === 'true') {
+      setOpen(false);
+      btn.focus();
+    }
+  });
+  matchMedia('(min-width: 901px)').addEventListener('change', (e) => e.matches && setOpen(false));
+</script>
