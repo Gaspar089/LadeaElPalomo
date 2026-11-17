@@ -63,6 +63,41 @@ test('página estática cumple los checks de accesibilidad y enlaces', async ({ 
   await page.screenshot({ path: path.join(dir, `${viewportNames[testInfo.project.name]}.png`), fullPage: true });
 });
 
+test('móvil: familias, fotos, etapas y teléfono responden al tacto', async ({ browser }, testInfo) => {
+  test.skip(!['mobile', 'mobile-small', 'tablet'].includes(testInfo.project.name));
+  const ctx = await browser.newContext({ ...testInfo.project.use, hasTouch: true, baseURL: 'http://localhost:4322' });
+  const page = await ctx.newPage();
+  await page.goto('/');
+  await expect(page.locator('.call-m')).toHaveAttribute('href', 'tel:+34926636703');
+  // chips: cada familia centra su ficha
+  for (const id of ['ferreteria', 'ceramica', 'bano', 'basico']) {
+    await page.locator(`.chip[data-chip="${id}"]`).tap();
+    await expect(page.locator(`.chip[data-chip="${id}"]`)).toHaveAttribute('aria-pressed', 'true');
+    await expect.poll(() => page.evaluate((id) => {
+      const rail = document.querySelector('[data-rail]')!.getBoundingClientRect();
+      const card = document.querySelector(`[data-card="${id}"]`)!.getBoundingClientRect();
+      return Math.abs(card.left + card.width / 2 - (rail.left + rail.width / 2)) < 40;
+    }, id)).toBe(true);
+  }
+  // flechas y contador
+  await page.locator('[data-step="1"]').tap();
+  await expect(page.locator('[data-rail-count]')).toHaveText('02');
+  // tocar la composición rota las fotos
+  const mini = page.locator('#ficha-ceramica [data-shuffle]');
+  const before = await mini.locator('.d0 img').getAttribute('alt');
+  await mini.tap();
+  await expect(mini.locator('[data-shuffle-n]')).toHaveText('2');
+  expect(await mini.locator('.d0 img').getAttribute('alt')).not.toBe(before);
+  // exposición: las cuatro etapas se recorren con scroll natural
+  const steps = page.locator('#exposicion .paso');
+  for (let i = 0; i < 4; i++) {
+    await steps.nth(i).scrollIntoViewIfNeeded();
+    await page.mouse.wheel(0, 40);
+    await expect(steps.nth(i).locator('h3')).toBeVisible();
+  }
+  await ctx.close();
+});
+
 test('con movimiento reducido, el hero se muestra', async ({ page }, testInfo) => {
   test.skip(testInfo.project.name !== 'desktop');
   await page.emulateMedia({ reducedMotion: 'reduce' });

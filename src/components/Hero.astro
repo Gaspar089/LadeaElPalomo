@@ -19,6 +19,9 @@ const muestras = [
 
 <section class="hero" id="top" aria-labelledby="hero-title" data-hero>
   <div class="stage" data-stage>
+    <!-- Escena: en escritorio display:contents; en móvil, pista sticky que da recorrido a la transición -->
+    <div class="scene" data-scene>
+    <div class="scene-in" data-scene-in>
     <!-- Ventana: de la obra (ladrillo) al espacio (baño terminado) -->
     <div class="window" data-window aria-hidden="true">
       <div class="layer layer--material" data-material>
@@ -50,6 +53,16 @@ const muestras = [
 
     <p class="word word--a" aria-hidden="true"><span data-word="a">Del material</span></p>
     <p class="word word--b" aria-hidden="true"><span data-word="b">al espacio</span></p>
+
+    <!-- Solo móvil: lo que vende y dónde, siempre visible bajo la ventana -->
+    <p class="band">
+      <span class="band-place">{negocio.localidad} · {negocio.provincia}</span>
+      <span class="band-text">Almacén de materiales y exposición en la calle Don Quijote</span>
+    </p>
+
+    <div class="ruler" aria-hidden="true"><span class="ruler-fill" data-ruler></span></div>
+    </div>
+    </div>
 
     <div class="info" data-side="left">
       <p class="place">{negocio.localidad} · {negocio.provincia}</p>
@@ -88,8 +101,6 @@ const muestras = [
         }
       </ul>
     </nav>
-
-    <div class="ruler" aria-hidden="true"><span class="ruler-fill" data-ruler></span></div>
   </div>
 </section>
 
@@ -330,69 +341,126 @@ const muestras = [
     transform-origin: left;
   }
 
-  /* --- tablet y móvil: flujo vertical, la ventana entre las dos palabras --- */
+  /* Escritorio: la escena no crea caja, todo se posiciona respecto a .stage como en la V2 */
+  .scene,
+  .scene-in {
+    display: contents;
+  }
+
+  .band {
+    display: none;
+  }
+
+  /* --- tablet y móvil: la misma escena por capas, fijada con sticky nativo (sin pin) --- */
   @media (max-width: 900px) {
     .stage {
-      display: grid;
-      grid-template-columns: minmax(0, 1fr);
       height: auto;
       min-height: 0;
       max-height: none;
-      padding: 16px var(--gutter) 40px;
-      row-gap: 0;
+      overflow: visible;
+    }
+
+    .scene {
+      --wfs: clamp(2.5rem, 12vw, 6.5rem);
+      --band: 104px;
+      --scene-h: max(520px, calc(100svh - var(--header-h)));
+      display: block;
+      position: relative;
+      height: var(--scene-h);
+    }
+
+    /* recorrido extra solo cuando el JS anima (sin JS o con reduced motion no hay hueco) */
+    .scene.is-scroll {
+      height: calc(var(--scene-h) + 65svh);
+    }
+
+    .scene-in {
+      display: block;
+      position: sticky;
+      top: var(--header-h);
+      height: var(--scene-h);
+      overflow: hidden;
     }
 
     .window {
-      position: relative;
-      inset: auto;
-      order: 2;
-      aspect-ratio: 4 / 3;
-      margin-inline: calc(var(--gutter) * -1);
-      clip-path: inset(0 var(--gutter) 0 var(--gutter));
+      /* encuadre inicial: entre las dos palabras, con los márgenes de la página */
+      clip-path: inset(
+        calc(12px + var(--wfs) * 0.98 + 14px) var(--gutter) calc(var(--band) + 8px + var(--wfs) * 0.98 + 14px)
+          var(--gutter)
+      );
     }
 
     .word {
-      position: relative;
-      inset: auto;
-      font-size: clamp(2.5rem, 12vw, 6.5rem);
+      font-size: var(--wfs);
       font-stretch: 108%;
     }
 
     .word--a {
-      order: 1;
-      margin-bottom: 12px;
+      top: 12px;
+      left: var(--gutter);
     }
 
     .word--b {
-      order: 3;
-      justify-self: end;
-      margin-top: 8px;
+      right: var(--gutter);
+      bottom: calc(var(--band) + 8px);
+    }
+
+    .band {
+      position: absolute;
+      z-index: 2;
+      left: var(--gutter);
+      right: var(--gutter);
+      bottom: 0;
+      display: flex;
+      flex-direction: column;
+      justify-content: center;
+      gap: 4px;
+      height: var(--band);
+      margin: 0;
+    }
+
+    .band-place {
+      color: var(--rojo);
+      font-size: var(--step--1);
+      font-weight: 640;
+      font-stretch: 90%;
+    }
+
+    .band-text {
+      max-width: 34ch;
+      font-weight: 600;
+      line-height: 1.3;
+    }
+
+    .ruler {
+      left: var(--gutter);
+      right: var(--gutter);
+      bottom: calc(var(--band) - 12px);
     }
 
     .info {
       position: static;
-      order: 4;
       width: auto;
       max-width: 560px;
-      margin-top: 32px;
+      padding: 32px var(--gutter) 0;
+    }
+
+    /* el lugar ya está en la banda de la escena */
+    .info .place {
+      display: none;
     }
 
     .muestras {
       position: static;
-      order: 5;
       width: auto;
       max-width: none;
-      margin-top: 40px;
+      padding: 40px var(--gutter) 48px;
     }
 
     .muestras ul {
       display: grid;
       grid-template-columns: repeat(2, minmax(0, 1fr));
       column-gap: 16px;
-    }
-
-    .ruler {
-      display: none;
     }
 
     .window-panel {
@@ -478,17 +546,43 @@ const muestras = [
           .to(panel, { autoAlpha: 1, y: 0, duration: 0.4 }, 1.7)
           .from(panel, { y: 24, duration: 0.4 }, 1.7);
       } else {
-        // Móvil: sin fijar; la transición material → espacio sigue al propio scroll del hero
+        // Táctil: la escena queda fija con sticky (CSS) durante 65svh de scroll natural y la
+        // secuencia de escritorio se reproduce en vertical: palabras fuera, ventana a sangre, ladrillo → baño
+        const scene = q<HTMLElement>('[data-scene]');
+        const sceneIn = q<HTMLElement>('[data-scene-in]');
+        scene.classList.add('is-scroll');
+        // recortes en px medidos (GSAP no interpola calc()); se recalculan en cada refresh
+        const startClip = () => {
+          const s = sceneIn.getBoundingClientRect();
+          const a = wordA.getBoundingClientRect();
+          const b = wordB.getBoundingClientRect();
+          const side = a.left - s.left;
+          return `inset(${a.bottom - s.top + 14}px ${side}px ${s.bottom - b.top + 14}px ${side}px)`;
+        };
+        const band = () => parseFloat(getComputedStyle(scene).getPropertyValue('--band')) || 104;
+
         gsap
           .timeline({
             defaults: { ease: 'none' },
-            // empieza cuando la ventana toca la cabecera: al cargar se ve el material entero
-            scrollTrigger: { trigger: win, start: 'top top+=72', end: 'bottom top+=72', scrub: 0.4 },
+            scrollTrigger: {
+              trigger: scene,
+              start: 'top top+=72',
+              end: 'bottom bottom',
+              scrub: 0.4,
+              invalidateOnRefresh: true,
+              onUpdate: (st) => gsap.set(ruler, { scaleX: st.progress }),
+            },
           })
-          .fromTo(espacio, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)' }, 0)
-          .fromTo(espacioImg, { scale: 1.2 }, { scale: 1 }, 0)
-          .to(wordA, { xPercent: -12 }, 0)
-          .to(wordB, { xPercent: 12 }, 0);
+          .to(wordA, { xPercent: -115, duration: 0.8 }, 0)
+          .to(wordB, { xPercent: 115, duration: 0.8 }, 0)
+          .to([wordA, wordB], { opacity: 0, duration: 0.25 }, 0.45)
+          .fromTo(win, { clipPath: startClip }, { clipPath: () => `inset(0px 0px ${band()}px 0px)`, duration: 1 }, 0)
+          .to(material, { scale: 1.08, duration: 1 }, 0)
+          .fromTo(espacio, { clipPath: 'inset(100% 0% 0% 0%)' }, { clipPath: 'inset(0% 0% 0% 0%)', duration: 0.9 }, 0.8)
+          .fromTo(espacioImg, { scale: 1.2 }, { scale: 1, duration: 1 }, 0.8)
+          .to(material, { scale: 0.94, filter: 'brightness(0.6)', duration: 0.9 }, 0.8);
+
+        return () => scene.classList.remove('is-scroll');
       }
     });
   }

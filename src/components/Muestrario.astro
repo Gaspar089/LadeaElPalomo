@@ -66,7 +66,8 @@ const pad = (n: number) => String(n).padStart(2, '0');
 // widths/sizes por capa (0 principal, 1 y 2 muestras)
 const anchos = [[480, 720, 1000], [320, 480, 640], [320, 480, 640]];
 const sizesStage = ['46vw', '20vw', '16vw'];
-const sizesRail = ['68vw', '34vw', '26vw'];
+// en el raíl todas las capas piden tamaño grande: al tocar, una muestra pasa a la capa principal
+const sizesRail = '68vw';
 ---
 
 <section class="muestrario" id="materiales" aria-labelledby="materiales-title" data-muestrario>
@@ -98,7 +99,14 @@ const sizesRail = ['68vw', '34vw', '26vw'];
         {
           familias.map((f, i) => (
             <article class="card" id={`ficha-${f.id}`} data-card={f.id}>
-              <div class="comp mini">
+              <div
+                class="comp mini"
+                role="button"
+                tabindex="0"
+                aria-label={`Ver otra fotografía de ${f.nombre}`}
+                data-shuffle
+              >
+                <span class="shuffle-n" aria-hidden="true"><span data-shuffle-n>1</span> / {f.capas.length}</span>
                 {f.capas.map((c, k) => (
                   <div class={`depth d${k}`}>
                     <div class="layer" data-sample={k > 0 ? '' : undefined}>
@@ -106,7 +114,7 @@ const sizesRail = ['68vw', '34vw', '26vw'];
                         src={c.img}
                         formats={['avif', 'webp']}
                         widths={anchos[k]}
-                        sizes={sizesRail[k]}
+                        sizes={sizesRail}
                         alt={c.alt}
                         loading="lazy"
                         style={`object-position:${c.pos}`}
@@ -130,6 +138,17 @@ const sizesRail = ['68vw', '34vw', '26vw'];
         }
       </div>
       <div class="rule" aria-hidden="true"></div>
+      <div class="rail-nav">
+        <button class="rail-btn" type="button" data-step="-1" aria-label="Familia anterior">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M15 18l-6-6 6-6"></path></svg>
+        </button>
+        <p class="rail-count" aria-live="polite">
+          <span data-rail-count>01</span><span class="of"> / {pad(familias.length)}</span>
+        </p>
+        <button class="rail-btn" type="button" data-step="1" aria-label="Familia siguiente">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" aria-hidden="true"><path d="M9 6l6 6-6 6"></path></svg>
+        </button>
+      </div>
     </div>
 
     <!-- Escritorio: lista + escenario -->
@@ -501,6 +520,79 @@ const sizesRail = ['68vw', '34vw', '26vw'];
       color: var(--cal);
     }
 
+    /* respuesta inmediata al toque */
+    .chip,
+    .rail-btn,
+    .mini {
+      -webkit-tap-highlight-color: transparent;
+    }
+
+    .chip:active,
+    .rail-btn:active {
+      transform: scale(0.97);
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .mini {
+      cursor: pointer;
+      transition: transform 160ms var(--ease-out);
+    }
+
+    .mini:active {
+      transform: scale(0.985);
+    }
+
+    .shuffle-n {
+      position: absolute;
+      z-index: 4;
+      left: 0;
+      top: 0;
+      padding: 6px 10px;
+      background: var(--cal);
+      font-size: 0.8rem;
+      font-weight: 640;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rail-nav {
+      display: flex;
+      align-items: center;
+      justify-content: space-between;
+      margin-top: 12px;
+    }
+
+    .rail-btn {
+      display: grid;
+      place-items: center;
+      width: 48px;
+      height: 48px;
+      border: 1.5px solid var(--grafito);
+      background: transparent;
+      color: var(--grafito);
+      cursor: pointer;
+    }
+
+    .rail-btn svg {
+      width: 20px;
+      height: 20px;
+    }
+
+    .rail-btn:disabled {
+      opacity: 0.35;
+      cursor: default;
+    }
+
+    .rail-count {
+      font-size: var(--step-1);
+      font-weight: 600;
+      font-stretch: 70%;
+      font-variant-numeric: tabular-nums;
+    }
+
+    .rail-count .of {
+      color: var(--cemento);
+    }
+
     .rail-wrap {
       display: block;
       margin-top: 20px;
@@ -600,6 +692,8 @@ const sizesRail = ['68vw', '34vw', '26vw'];
     const rail = root.querySelector<HTMLElement>('[data-rail]')!;
     const railWrap = root.querySelector<HTMLElement>('[data-rail-wrap]')!;
     const chipBar = root.querySelector<HTMLElement>('[data-chips]')!;
+    const railCount = root.querySelector<HTMLElement>('[data-rail-count]')!;
+    const stepBtns = all<HTMLButtonElement>('[data-step]');
     const ids = rows.map((b) => b.dataset.target!);
     const desktop = matchMedia('(min-width: 901px)');
     const reducedQ = matchMedia('(prefers-reduced-motion: reduce)');
@@ -619,7 +713,9 @@ const sizesRail = ['68vw', '34vw', '26vw'];
       rows.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.target === id)));
       chips.forEach((b) => b.setAttribute('aria-pressed', String(b.dataset.chip === id)));
       stacks.forEach((s) => s.toggleAttribute('data-active', s.dataset.stack === id));
-      count.textContent = String(ids.indexOf(id) + 1).padStart(2, '0');
+      const n = ids.indexOf(id);
+      count.textContent = railCount.textContent = String(n + 1).padStart(2, '0');
+      stepBtns.forEach((b) => (b.disabled = n + Number(b.dataset.step) < 0 || n + Number(b.dataset.step) >= ids.length));
     };
 
     const reset = () => {
@@ -696,14 +792,57 @@ const sizesRail = ['68vw', '34vw', '26vw'];
       li.addEventListener('pointerleave', () => clearTimeout(timer));
     });
 
-    // Móvil: chips -> ficha
-    chips.forEach((c) => {
-      c.addEventListener('click', () => {
-        const id = c.dataset.chip!;
-        setState(id);
-        cards
-          .find((k) => k.dataset.card === id)
-          ?.scrollIntoView({ inline: 'center', block: 'nearest', behavior: reducedQ.matches ? 'auto' : 'smooth' });
+    // Móvil: chips y flechas -> ficha. Solo se desplaza el raíl (scrollIntoView movía también la página)
+    // y mientras dura ese desplazamiento el observer no reasigna el chip (evita el parpadeo intermedio)
+    let lockUntil = 0;
+    const goTo = (id: string) => {
+      setState(id);
+      const card = cards.find((k) => k.dataset.card === id)!;
+      lockUntil = performance.now() + 700;
+      rail.scrollTo({
+        left: card.offsetLeft - (rail.clientWidth - card.offsetWidth) / 2,
+        behavior: reducedQ.matches ? 'auto' : 'smooth',
+      });
+      centerChip(id);
+    };
+    const centerChip = (id: string) => {
+      const chip = chips.find((c) => c.dataset.chip === id)!;
+      chipBar.scrollTo({
+        left: chip.offsetLeft - (chipBar.clientWidth - chip.offsetWidth) / 2,
+        behavior: reducedQ.matches ? 'auto' : 'smooth',
+      });
+    };
+    chips.forEach((c) => c.addEventListener('click', () => goTo(c.dataset.chip!)));
+    stepBtns.forEach((b) =>
+      b.addEventListener('click', () => {
+        const next = ids[ids.indexOf(current) + Number(b.dataset.step)];
+        if (next) goTo(next);
+      }),
+    );
+    rail.addEventListener('scrollend', () => (lockUntil = 0));
+    setState(current);
+
+    // Móvil: tocar la composición rota sus fotografías (equivalente táctil de la profundidad con puntero)
+    let shuffleFx: ((card: HTMLElement) => void) | null = null;
+    all('[data-shuffle]').forEach((mini) => {
+      const n = mini.querySelector<HTMLElement>('[data-shuffle-n]')!;
+      const total = all('.layer', mini).length;
+      let pos = 1;
+      const rotate = () => {
+        const layers = all('.layer', mini);
+        const pics = layers.map((l) => l.querySelector('picture')!);
+        // la principal pasa al final; cada muestra sube un puesto
+        pics.forEach((p, i) => layers[(i - 1 + layers.length) % layers.length].appendChild(p));
+        pos = (pos % total) + 1;
+        n.textContent = String(pos);
+        shuffleFx?.(mini);
+      };
+      mini.addEventListener('click', rotate);
+      mini.addEventListener('keydown', (e) => {
+        if (e.key === 'Enter' || e.key === ' ') {
+          e.preventDefault();
+          rotate();
+        }
       });
     });
 
@@ -714,13 +853,9 @@ const sizesRail = ['68vw', '34vw', '26vw'];
         for (const e of entries) {
           const card = e.target as HTMLElement;
           if (e.intersectionRatio >= 0.35) reveal?.(card);
-          if (e.intersectionRatio >= 0.6 && !desktop.matches) {
+          if (e.intersectionRatio >= 0.6 && !desktop.matches && performance.now() > lockUntil) {
             setState(card.dataset.card!);
-            const chip = chips.find((c) => c.dataset.chip === card.dataset.card)!;
-            chipBar.scrollTo({
-              left: chip.offsetLeft - (chipBar.clientWidth - chip.offsetWidth) / 2,
-              behavior: reducedQ.matches ? 'auto' : 'smooth',
-            });
+            centerChip(card.dataset.card!);
           }
         }
       },
@@ -769,13 +904,26 @@ const sizesRail = ['68vw', '34vw', '26vw'];
       const seen = new Set<HTMLElement>([cards[0]]);
       const samples = (c: HTMLElement) => all('[data-sample]', c);
       cards.slice(1).forEach((c) => gsap.set(samples(c), { opacity: 0, y: 16 }));
+      // misma máscara diagonal que el escenario de escritorio
+      const mask = (el: Element) =>
+        gsap.fromTo(
+          el,
+          { clipPath: 'polygon(0% 100%, 0% 100%, 28% 100%, 0% 72%)' },
+          { clipPath: 'polygon(0% 0%, 100% 0%, 100% 100%, 0% 100%)', duration: 0.7, ease: EASE, clearProps: 'clipPath' },
+        );
       reveal = (c) => {
         if (seen.has(c)) return;
         seen.add(c);
-        gsap.to(samples(c), { opacity: 1, y: 0, duration: 0.6, ease: EASE, stagger: 0.08 });
+        mask(c.querySelector('.d0 .layer')!);
+        gsap.to(samples(c), { opacity: 1, y: 0, duration: 0.6, ease: EASE, stagger: 0.08, delay: 0.1 });
+      };
+      shuffleFx = (mini) => {
+        mask(mini.querySelector('.d0 .layer')!);
+        gsap.fromTo(samples(mini), { y: 12, opacity: 0.4 }, { y: 0, opacity: 1, duration: 0.45, ease: EASE, stagger: 0.06 });
       };
       return () => {
         reveal = null;
+        shuffleFx = null;
       };
     });
 
